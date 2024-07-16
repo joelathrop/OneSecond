@@ -12,6 +12,22 @@ let firstTime = false;
 let guess = false;
 const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRVNDUifQ.eyJpYXQiOjE3MjA4OTk3MTQsImV4cCI6MTczNjQ1MTcxNCwiaXNzIjoiMzNWODU3Tjc0NCJ9.zzlR2GUb829Brq-i_Y5l8RZNLjae34NC0Q4oexSpbZo7igEjc7jrbUOgU5OufcQGRJp5vxWUAiDmoMJh49YCww';
 
+// TODO: Saving/loading states?
+
+// Routing
+const routes = {
+    '/': showHome,
+    '/playlists': showPlaylists,
+    '/play': showGame,
+};
+
+function router() {
+    const path = window.location.pathname;
+    const route = routes[path] || showHome; // Default to home if no match
+    route();
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     MusicKit.configure({
         developerToken: developerToken,
@@ -45,8 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
-            fetchUserPlaylists(music);
-            showPage('page2');
+            // fetchUserPlaylists(music);
+            // showPage('page2');
+            window.history.pushState({}, '', '/playlists');
+            router();
         });
 
         document.getElementById('searchInput').addEventListener('input', () => {
@@ -56,13 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('homeButton2').addEventListener('click', () => {
             reset();
-            showPage('page1');
-        })
+            // showPage('page1');
+            window.history.pushState({}, '', '/');
+            router();
+        });
 
         document.getElementById('homeButton3').addEventListener('click', () => {
             reset();
-            showPage('page1');
-        })
+            // showPage('page1');
+            window.history.pushState({}, '', '/');
+            router();
+        });
 
         document.getElementById('unauthorizeButton').addEventListener('click', () => {
             music.unauthorize();
@@ -71,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fetchPlaylistsButton').style.display = 'none';
             document.getElementById('unauthorizeButton').style.display = 'none'; // Hide unauthorize button
         });
+
+        window.onpopstate = router;
+
+        router();
     }, 1000);
 });
 
@@ -91,6 +117,19 @@ function reset() {
     document.getElementById('songList').textContent = '';
     document.getElementById('itemList').textContent = '';
     document.getElementById('statsList').textContent = '';
+}
+
+function showHome() {
+    showPage('page1');
+}
+
+function showPlaylists() {
+    showPage('page2');
+    fetchUserPlaylists(music);
+}
+
+function showGame() {
+    showPage('page3');
 }
 
 function showPage(pageId) {
@@ -176,6 +215,7 @@ function fetchPlaylistsPage(nextUrl) {
 
 function fetchPlaylistSongs(playlistId) {
     const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks`;
+    // showGame();
 
     fetch(url, {
         method: 'GET',
@@ -217,10 +257,10 @@ function displayItems(items) {
             if (!playing) {
                 selectedPlaylistId = item.id;
                 console.log(`Selected playlist:`, item);
+                showGame();
                 fetchPlaylistSongs(selectedPlaylistId);
 
                 itemList.innerHTML = '';
-                showPage('page3');
             } else {
                 songComparator(item.id);
             }
