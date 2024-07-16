@@ -4,5 +4,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="bulma" level="application" />
+    <orderEntry type="library" name="musickit" level="application" />
   </component>
 </module>
