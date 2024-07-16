@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apple MusicKit Connection</title>
+    <title>OneSecond v.Alpha</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
     <style>
         .page { display: none; }
@@ -11,33 +12,47 @@
     </style>
 </head>
 <body>
-<h1>OneSecond v.Alpha</h1>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">OneSecond v.Alpha</h1>
 
-<div id="page1" class="page active">
-    <button id="authorizeButton">Log In</button>
-    <button id="unauthorizeButton">Log Out</button>
-    <button id="fetchLibraryButton">Play With Your Library</button>
-    <button id="fetchPlaylistsButton" >Play With a Playlist</button>
-</div>
+            <div id="page1" class="page active">
+                <div class="buttons">
+                    <button id="authorizeButton" class="button is-primary">Log In</button>
+                    <button id="unauthorizeButton" class="button is-danger">Log Out</button>
+                    <button id="fetchLibraryButton" class="button is-info">Play With Your Library</button>
+                    <button id="fetchPlaylistsButton" class="button is-info">Play With a Playlist</button>
+                </div>
+            </div>
 
-<div id="page2" class="page">
-    <h2>Select a Playlist</h2>
-    <input type="text" id="searchInput" placeholder="Search Playlists..." />
-    <button id="homeButton2">Home</button>
-</div>
+            <div id="page2" class="page">
+                <h2 class="subtitle">Select a Playlist</h2>
+                <div class="field">
+                    <div class="control">
+                        <input type="text" id="searchInput" class="input" placeholder="Search Playlists...">
+                    </div>
+                </div>
+                <button id="homeButton2" class="button is-link">Home</button>
+            </div>
 
-<div id="page3" class="page">
-    <h2>Guess the song</h2>
-    <button id="playButton" >Play</button>
-    <input type="text" id="guessInput" placeholder="Guess the song..." />
-    <button id="homeButton3">Home</button>
-</div>
+            <div id="page3" class="page">
+                <h2 class="subtitle">Guess the song</h2>
+                <button id="playButton" class="button is-success">Play</button>
+                <div class="field">
+                    <div class="control">
+                        <input type="text" id="guessInput" class="input" placeholder="Guess the song...">
+                    </div>
+                </div>
+                <button id="homeButton3" class="button is-link">Home</button>
+            </div>
 
-<ul id="itemList"></ul>
-<ul id="songList"></ul>
-<ul id="statsList"></ul>
+            <ul id="itemList" class="mt-4"></ul>
+            <ul id="songList" class="mt-4"></ul>
+            <ul id="statsList" class="mt-4"></ul>
+        </div>
+    </section>
 
-<script>
+    <script>
         let songCount = 0;
         let correctCount = 0;
         let incorrectCount = 0;
@@ -413,6 +428,6 @@
                 }
             });
         }
-</script>
+    </script>
 </body>
 </html>
