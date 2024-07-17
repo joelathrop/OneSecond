@@ -106,8 +106,10 @@ function reset() {
     const music = MusicKit.getInstance();
     music.stop();
     // TODO: RESET QUEUE, THIS WORKS BUT THROWS ERROR
-    music.setQueue(null).then(r => {
-        console.log('Playback queue reset');
+    music.setQueue([]).then(r => {
+        console.log('Playback queue reset successfully');
+    }).catch((error) => {
+        console.error('Failed to reset the playback queue:', error);
     });
 
     songCount = 0;
@@ -117,6 +119,7 @@ function reset() {
     currentSongId = null;
     currentSong = null;
     selectedPlaylistId = null;
+    selectedPlaylistTracks = null;
     playing = false;
     firstTime = false;
     guess = false;
@@ -134,6 +137,8 @@ function reset() {
     document.getElementById('fetchLibraryButton').style.display = 'inline';
     document.getElementById('fetchPlaylistsButton').style.display = 'inline';
     document.getElementById('guessInput').style.display = 'none';
+
+    updateStats();
 }
 
 function showHome() {
@@ -154,9 +159,12 @@ function showPage(pageId) {
     console.log(`Showing page: ${pageId}`);
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
-    console.log(document.getElementById('page3').classList);
+    // console.log(document.getElementById('page3').classList);
 }
 
+function updateStats() {
+    document.getElementById('stats').textContent = `Score: ${correctCount} / ${correctCount + incorrectCount}`
+}
 
 function fetchUserLibrary(music) {
     console.log('Fetching user library...');
@@ -301,10 +309,12 @@ function showSongInfo(guess, song) {
     if (guess) {
         songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
         music.stop();
+        updateStats();
         play(selectedPlaylistTracks);
     } else {
         songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
         music.stop();
+        updateStats();
         play(selectedPlaylistTracks);
     }
 }
@@ -318,6 +328,7 @@ function songComparator(songId) {
     } else {
         console.log('Guessed incorrectly');
         guess = false;
+        songCount++;
         incorrectCount++;
     }
     showSongInfo(guess, currentSong);
@@ -398,6 +409,7 @@ function play(songs) {
         filterSongs(searchTerm);
     });
     document.getElementById('guessInput').style.display = 'inline';
+    document.getElementById('stats').style.display = 'inline';
 
     // shuffle songs
     if (firstTime) {
