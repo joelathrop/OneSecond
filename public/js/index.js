@@ -18,11 +18,12 @@ const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRV
 const routes = {
     '/': showHome,
     '/playlists': showPlaylists,
-    '/play': showGame,
+    '/playlists/play': showGame,
 };
 
 function router() {
     const path = window.location.pathname;
+    console.log(`Routing to: ${path}`);
     const route = routes[path] || showHome; // Default to home if no match
     route();
 }
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
             // fetchUserPlaylists(music);
             // showPage('page2');
+            showPlaylists();
             window.history.pushState({}, '', '/playlists');
             router();
         });
@@ -101,6 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function reset() {
+    const music = MusicKit.getInstance();
+    music.stop();
+    // TODO: RESET QUEUE, THIS WORKS BUT THROWS ERROR
+    music.setQueue(null).then(r => {
+        console.log('Playback queue reset');
+    });
+
     songCount = 0;
     correctCount = 0;
     incorrectCount = 0;
@@ -117,6 +126,14 @@ function reset() {
     document.getElementById('songList').textContent = '';
     document.getElementById('itemList').textContent = '';
     document.getElementById('statsList').textContent = '';
+
+    // Ensure necessary buttons and inputs are hidden/shown
+    document.getElementById('searchInput').style.display = 'none';
+    document.getElementById('authorizeButton').style.display = 'inline';
+    document.getElementById('unauthorizeButton').style.display = 'inline';
+    document.getElementById('fetchLibraryButton').style.display = 'inline';
+    document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+    document.getElementById('guessInput').style.display = 'none';
 }
 
 function showHome() {
@@ -130,13 +147,14 @@ function showPlaylists() {
 
 function showGame() {
     showPage('page3');
+    fetchPlaylistSongs(selectedPlaylistId);
 }
 
 function showPage(pageId) {
     console.log(`Showing page: ${pageId}`);
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
-    console.log(document.getElementById('page1').classList);
+    console.log(document.getElementById('page3').classList);
 }
 
 
@@ -175,6 +193,7 @@ function fetchUserLibrary(music) {
 function fetchUserPlaylists(music) {
     console.log('Fetching user playlists...');
     const musicUserToken = music.musicUserToken;
+    document.getElementById('searchInput').style.display = 'inline';
 
     if (!musicUserToken) {
         console.error('Music user token is undefined. Make sure you are authorized.');
@@ -216,6 +235,7 @@ function fetchPlaylistsPage(nextUrl) {
 function fetchPlaylistSongs(playlistId) {
     const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks`;
     // showGame();
+    document.getElementById('guessInput').style.display = 'inline';
 
     fetch(url, {
         method: 'GET',
@@ -258,7 +278,7 @@ function displayItems(items) {
                 selectedPlaylistId = item.id;
                 console.log(`Selected playlist:`, item);
                 showGame();
-                fetchPlaylistSongs(selectedPlaylistId);
+                // fetchPlaylistSongs(selectedPlaylistId);
 
                 itemList.innerHTML = '';
             } else {
@@ -270,14 +290,18 @@ function displayItems(items) {
 }
 
 function showSongInfo(guess, song) {
+    // TODO: IS THIS WHERE THE STOP() GOES?
     const songInfo = document.getElementById('songList');
+    const music = MusicKit.getInstance();
     songInfo.innerHTML = '';
 
     if (guess) {
         songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        music.stop();
         play(selectedPlaylistTracks);
     } else {
         songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        music.stop();
         play(selectedPlaylistTracks);
     }
 }
