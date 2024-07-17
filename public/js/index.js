@@ -200,10 +200,13 @@ function fetchUserPlaylists(music) {
         return;
     }
 
+    // Clear the allPlaylists array before fetching new data
+    allPlaylists = [];
     const url = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
 
     fetchPlaylistsPage(url);
 }
+
 
 function fetchPlaylistsPage(nextUrl) {
     fetch(nextUrl, {
@@ -267,19 +270,18 @@ function fetchPlaylistSongs(playlistId) {
 
 function displayItems(items) {
     const itemList = document.getElementById('itemList');
-    itemList.innerHTML = ''; // Clear existing items
+    itemList.innerHTML = '';
 
     items.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item.attributes.name;
         li.setAttribute('data-id', item.id);
+        li.classList.add('button', 'is-ghost', 'is-fullwidth');
         li.addEventListener('click', () => {
             if (!playing) {
                 selectedPlaylistId = item.id;
                 console.log(`Selected playlist:`, item);
                 showGame();
-                // fetchPlaylistSongs(selectedPlaylistId);
-
                 itemList.innerHTML = '';
             } else {
                 songComparator(item.id);
@@ -288,6 +290,7 @@ function displayItems(items) {
         itemList.appendChild(li);
     });
 }
+
 
 function showSongInfo(guess, song) {
     // TODO: IS THIS WHERE THE STOP() GOES?
@@ -413,3 +416,36 @@ function play(songs) {
         }
     });
 }
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const difficultySelection = document.getElementById('difficultySelection');
+    const mainSection = document.getElementById('mainSection');
+    
+    const easyButton = document.getElementById('easyButton');
+    const mediumButton = document.getElementById('mediumButton');
+    const hardButton = document.getElementById('hardButton');
+
+    easyButton.addEventListener('click', () => {
+        difficultySelection.style.display = 'none';
+        mainSection.style.display = 'block';
+        // You can add logic here for easy difficulty
+    });
+
+    mediumButton.addEventListener('click', () => {
+        difficultySelection.style.display = 'none';
+        mainSection.style.display = 'block';
+        // You can add logic here for medium difficulty
+    });
+
+    hardButton.addEventListener('click', () => {
+        difficultySelection.style.display = 'none';
+        mainSection.style.display = 'block';
+        // You can add logic here for hard difficulty
+    });
+
+});
