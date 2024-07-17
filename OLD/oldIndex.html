@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneSecond v.Alpha</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
+    <style>
+        .page {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<section class="section">
+    <div class="container">
+        <h1 class="title">OneSecond v.Alpha</h1>
+
+        <div id="page1" class="page active">
+            <div class="buttons">
+                <button id="authorizeButton" class="button is-primary">Log In</button>
+                <button id="unauthorizeButton" class="button is-danger">Log Out</button>
+                <button id="fetchLibraryButton" class="button is-info">Play With Your Library</button>
+                <button id="fetchPlaylistsButton" class="button is-info">Play With a Playlist</button>
+            </div>
+        </div>
+
+        <div id="page2" class="page">
+            <h2 class="subtitle">Select a Playlist</h2>
+            <div class="field">
+                <div class="control">
+                    <input type="text" id="searchInput" class="input" placeholder="Search Playlists...">
+                </div>
+            </div>
+            <button id="homeButton2" class="button is-link">Home</button>
+        </div>
+
+        <div id="page3" class="page">
+            <h2 class="subtitle">Guess the song</h2>
+            <button id="playButton" class="button is-success">Play</button>
+            <div class="field">
+                <div class="control">
+                    <input type="text" id="guessInput" class="input" placeholder="Guess the song...">
+                </div>
+            </div>
+            <button id="homeButton3" class="button is-link">Home</button>
+        </div>
+
+        <ul id="itemList" class="mt-4"></ul>
+        <ul id="songList" class="mt-4"></ul>
+        <ul id="statsList" class="mt-4"></ul>
+    </div>
+</section>
+
+<script src="/js/index.js"></script>
+</body>
+</html>
