@@ -10,7 +10,6 @@
         .page { display: none; }
         .active { display: block; }
         .box-container { margin-bottom: 20px; }
-        /* .header-title { display: flex; align-items: center; } */
     </style>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -50,7 +49,6 @@
                                 <input type="text" id="searchInput" class="input" placeholder="Search Playlists...">
                             </div>
                         </div>
-                        <ul id="itemList" class="mt-4"></ul>
                         <div class="home-button-container">
                             <button id="homeButton2" class="button is-link">Home</button>
                         </div>
@@ -74,12 +72,17 @@
                         <div class="stats-container">
                             <div id="stats">Score: </div>
                         </div>
+<!--                        <div class="songs-wrong-container">-->
+<!--                            <div id="songsWrong">Here are the songs you got wrong: </div>-->
+<!--                        </div>-->
                     </div>
                 </div>
             </div>
 
+            <ul id="itemList" class="mt-4"></ul>
             <ul id="songList" class="mt-4"></ul>
             <ul id="statsList" class="mt-4"></ul>
+            <ul id="songsWrong" class="mt-4"></ul>
         </div>
     </section>
 

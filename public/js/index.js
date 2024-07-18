@@ -1,9 +1,11 @@
 let songCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
+let playlistSize = 0;
 let music;
-let selectedPlaylistTracks;
+let selectedPlaylistTracks = [];
 let allPlaylists = [];
+let songsWrong = [];
 let currentSongId = null;
 let currentSong = null;
 let selectedPlaylistId = null;
@@ -13,21 +15,6 @@ let guess = false;
 const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRVNDUifQ.eyJpYXQiOjE3MjA4OTk3MTQsImV4cCI6MTczNjQ1MTcxNCwiaXNzIjoiMzNWODU3Tjc0NCJ9.zzlR2GUb829Brq-i_Y5l8RZNLjae34NC0Q4oexSpbZo7igEjc7jrbUOgU5OufcQGRJp5vxWUAiDmoMJh49YCww';
 
 // TODO: Saving/loading states?
-
-// Routing
-const routes = {
-    '/': showHome,
-    '/playlists': showPlaylists,
-    '/playlists/play': showGame,
-};
-
-function router() {
-    const path = window.location.pathname;
-    console.log(`Routing to: ${path}`);
-    const route = routes[path] || showHome; // Default to home if no match
-    route();
-}
-
 
 document.addEventListener('DOMContentLoaded', () => {
     MusicKit.configure({
@@ -102,11 +89,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 });
 
+/**
+ * Resets all global variables, including counters, arrays, buttons,
+ * search bars, and the game statistics
+ */
 function reset() {
     const music = MusicKit.getInstance();
     music.stop();
-    // TODO: RESET QUEUE, THIS WORKS BUT THROWS ERROR
-    music.setQueue([]).then(r => {
+    // const emptyArray = [''];
+    // music.setQueue(emptyArray);
+    // TODO: RESET QUEUE
+    music.setQueue({songs: []}).then(r => {
         console.log('Playback queue reset successfully');
     }).catch((error) => {
         console.error('Failed to reset the playback queue:', error);
@@ -115,11 +108,13 @@ function reset() {
     songCount = 0;
     correctCount = 0;
     incorrectCount = 0;
+    playlistSize = 0;
     allPlaylists = [];
+    songsWrong = [];
+    selectedPlaylistTracks = [];
     currentSongId = null;
     currentSong = null;
     selectedPlaylistId = null;
-    selectedPlaylistTracks = null;
     playing = false;
     firstTime = false;
     guess = false;
@@ -129,6 +124,7 @@ function reset() {
     document.getElementById('songList').textContent = '';
     document.getElementById('itemList').textContent = '';
     document.getElementById('statsList').textContent = '';
+    document.getElementById('songsWrong').textContent = '';
 
     // Ensure necessary buttons and inputs are hidden/shown
     document.getElementById('searchInput').style.display = 'none';
@@ -137,35 +133,24 @@ function reset() {
     document.getElementById('fetchLibraryButton').style.display = 'inline';
     document.getElementById('fetchPlaylistsButton').style.display = 'inline';
     document.getElementById('guessInput').style.display = 'none';
+    document.getElementById('songsWrong').style.display = 'none';
 
     updateStats();
 }
 
-function showHome() {
-    showPage('page1');
-}
-
-function showPlaylists() {
-    showPage('page2');
-    fetchUserPlaylists(music);
-}
-
-function showGame() {
-    showPage('page3');
-    fetchPlaylistSongs(selectedPlaylistId);
-}
-
-function showPage(pageId) {
-    console.log(`Showing page: ${pageId}`);
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    // console.log(document.getElementById('page3').classList);
-}
-
+/**
+ * Dynamically updates the score while the game is in progress
+ */
 function updateStats() {
     document.getElementById('stats').textContent = `Score: ${correctCount} / ${correctCount + incorrectCount}`
 }
 
+/**
+ * Fetches all songs in the authorized user's Apple Music library,
+ * then displays them using displayItems()
+ *
+ * @param music - MusicKit instance
+ */
 function fetchUserLibrary(music) {
     console.log('Fetching user library...');
     const musicUserToken = music.musicUserToken;
@@ -198,6 +183,11 @@ function fetchUserLibrary(music) {
         })
 }
 
+/**
+ * Makes sure user is authorized to fetch library playlists
+ *
+ * @param music - MusicKit Instance
+ */
 function fetchUserPlaylists(music) {
     console.log('Fetching user playlists...');
     const musicUserToken = music.musicUserToken;
@@ -215,7 +205,12 @@ function fetchUserPlaylists(music) {
     fetchPlaylistsPage(url);
 }
 
-
+/**
+ * Fetches user's library playlists, then displays them
+ * using displayItems
+ *
+ * @param nextUrl - API URL call
+ */
 function fetchPlaylistsPage(nextUrl) {
     fetch(nextUrl, {
         method: 'GET',
@@ -243,6 +238,11 @@ function fetchPlaylistsPage(nextUrl) {
         });
 }
 
+/**
+ * Fetches the songs in the selected playlist and passes them to the play() function
+ *
+ * @param playlistId - Playlist's ID
+ */
 function fetchPlaylistSongs(playlistId) {
     const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks`;
     // showGame();
@@ -266,6 +266,7 @@ function fetchPlaylistSongs(playlistId) {
                 selectedPlaylistTracks = data.data;
                 console.log('Tracks in the playlist:', selectedPlaylistTracks);
                 firstTime = true;
+                playlistSize = selectedPlaylistTracks.length;
                 play(selectedPlaylistTracks);
             } else {
                 console.error('No tracks found in the playlist response:', data);
@@ -276,6 +277,10 @@ function fetchPlaylistSongs(playlistId) {
         });
 }
 
+/**
+ * Displays items in passed list. Each item is
+ * @param items
+ */
 function displayItems(items) {
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = '';
@@ -299,64 +304,12 @@ function displayItems(items) {
     });
 }
 
-
-function showSongInfo(guess, song) {
-    // TODO: IS THIS WHERE THE STOP() GOES?
-    const songInfo = document.getElementById('songList');
-    const music = MusicKit.getInstance();
-    songInfo.innerHTML = '';
-
-    if (guess) {
-        songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
-        music.stop();
-        updateStats();
-        play(selectedPlaylistTracks);
-    } else {
-        songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
-        music.stop();
-        updateStats();
-        play(selectedPlaylistTracks);
-    }
-}
-
-function songComparator(songId) {
-    if (songId === currentSongId) {
-        console.log('Guessed correctly');
-        songCount++;
-        correctCount++;
-        guess = true;
-    } else {
-        console.log('Guessed incorrectly');
-        guess = false;
-        songCount++;
-        incorrectCount++;
-    }
-    showSongInfo(guess, currentSong);
-}
-
-function filterPlaylists(searchTerm) {
-    const filteredPlaylists = allPlaylists.filter(playlist =>
-        playlist.attributes.name.toLowerCase().includes(searchTerm)
-    );
-    displayItems(filteredPlaylists);
-}
-
-function filterSongs(searchTerm) {
-    // hide songs if nothing in the search bar
-    // TODO: Also want to limit shown songs to if 2 or 3+ characters match.
-    // BUT, can't do this because what if the song is only 1 or 2 characters?
-    if (searchTerm.trim() === '') {
-        displayItems([]);
-        return;
-    }
-
-    const filteredSongs = selectedPlaylistTracks.filter(song =>
-        song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    displayItems(filteredSongs);
-}
-
+/**
+ * Shuffles an array
+ *
+ * @param array
+ * @returns {*} - shuffled array
+ */
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -365,6 +318,10 @@ function shuffleArray(array) {
     return array;
 }
 
+/**
+ * Adds a song to the queue and plays it for 2 seconds
+ * @param songId - song to play's ID
+ */
 function playSong(songId) {
     const music = MusicKit.getInstance();
 
@@ -376,7 +333,7 @@ function playSong(songId) {
             setTimeout(() => {
                 music.pause();
                 console.log('Playback paused');
-            }, 3000);
+            }, 2000);
         }).catch(error => {
             console.error('Error starting playback:', error);
         });
@@ -385,13 +342,11 @@ function playSong(songId) {
     });
 }
 
-function endgame() {
-    const stats = document.getElementById('statsList');
-    stats.innerHTML = '';
-
-    stats.textContent = 'You finished! You got: ' + `${correctCount}` + '/' + `${incorrectCount + correctCount}` + " correct.";
-}
-
+/**
+ * Plays the game
+ *
+ * @param songs - playlist songs to play
+ */
 function play(songs) {
     playing = true;
 
@@ -404,12 +359,12 @@ function play(songs) {
 
     displayItems([]);
 
+    document.getElementById('stats').style.display = 'inline';
+    document.getElementById('guessInput').style.display = 'inline';
     document.getElementById('guessInput').addEventListener('input', () => {
         const searchTerm = document.getElementById('guessInput').value.toLowerCase();
         filterSongs(searchTerm);
     });
-    document.getElementById('guessInput').style.display = 'inline';
-    document.getElementById('stats').style.display = 'inline';
 
     // shuffle songs
     if (firstTime) {
@@ -429,10 +384,144 @@ function play(songs) {
     });
 }
 
+/**
+ * Input bar filter for playlists
+ * @param searchTerm
+ */
+function filterPlaylists(searchTerm) {
+    const filteredPlaylists = allPlaylists.filter(playlist =>
+        playlist.attributes.name.toLowerCase().includes(searchTerm)
+    );
+    displayItems(filteredPlaylists);
+}
+
+/**
+ * Input bar filter for songs
+ * @param searchTerm
+ */
+function filterSongs(searchTerm) {
+    // hide songs if nothing in the search bar
+    // TODO: Also want to limit shown songs to if 2 or 3+ characters match.
+    // BUT, can't do this because what if the song is only 1 or 2 characters?
+    if (searchTerm.trim() === '') {
+        displayItems([]);
+        return;
+    }
+
+    const filteredSongs = selectedPlaylistTracks.filter(song =>
+        song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    displayItems(filteredSongs);
+}
+
+/**
+ * Compares two songs based on ID
+ * Increases the count
+ * @param songId
+ */
+function songComparator(songId) {
+    if (songId === currentSongId) {
+        console.log('Guessed correctly');
+        songCount++;
+        correctCount++;
+        guess = true;
+    } else {
+        console.log('Guessed incorrectly');
+        guess = false;
+        songCount++;
+        incorrectCount++;
+    }
+    showSongInfo(guess, currentSong);
+}
+
+/**
+ * Prints song title and artist
+ * @param guess
+ * @param song
+ */
+function showSongInfo(guess, song) {
+    const songInfo = document.getElementById('songList');
+    const music = MusicKit.getInstance();
+    songInfo.innerHTML = '';
+
+    if (guess) {
+        songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        music.stop();
+        updateStats();
+        console.log(songCount);
+        console.log(playlistSize);
+        if (playlistSize === songCount) {
+            endgame();
+        } else {
+            play(selectedPlaylistTracks);
+        }
+    } else {
+        songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        music.stop();
+        updateStats();
+        songsWrong.push(" " + song.attributes.name);
+        console.log(songCount);
+        console.log(playlistSize);
+        if (playlistSize === songCount) {
+            endgame();
+        } else {
+            play(selectedPlaylistTracks);
+        }
+    }
+}
+
+/**
+ * Function to finish the game
+ */
+function endgame() {
+    const stats = document.getElementById('statsList');
+    stats.innerHTML = '';
+    document.getElementById('songsWrong').style.display = 'inline';
+    document.getElementById('songsWrong').textContent = "Songs you got wrong: " + songsWrong;
+
+    stats.textContent = 'You finished! You got: ' + `${correctCount}` + '/' + `${incorrectCount + correctCount}` + " correct.";
+}
+
+// Routing
+const routes = {
+    '/': showHome,
+    '/playlists': showPlaylists,
+    '/playlists/play': showGame,
+};
+
+function router() {
+    const path = window.location.pathname;
+    console.log(`Routing to: ${path}`);
+    const route = routes[path] || showHome; // Default to home if no match
+    route();
+}
+
+function showPage(pageId) {
+    console.log(`Showing page: ${pageId}`);
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    // console.log(document.getElementById('page3').classList);
+}
+
+function showHome() {
+    showPage('page1');
+}
+
+function showPlaylists() {
+    showPage('page2');
+    fetchUserPlaylists(music);
+}
+
+function showGame() {
+    showPage('page3');
+    fetchPlaylistSongs(selectedPlaylistId);
+}
 
 
 
 
+// TODO: ???
 
 document.addEventListener('DOMContentLoaded', () => {
     const difficultySelection = document.getElementById('difficultySelection');
