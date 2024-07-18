@@ -3,6 +3,8 @@ let prevSongCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let playlistSize = 0;
+let gamemode = -1;
+let playTime = 2000;
 let music;
 let selectedPlaylistTracks = [];
 let allPlaylists = [];
@@ -38,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('authorizeButton').addEventListener('click', () => {
             music.authorize().then((musicUserToken) => {
                 console.log(`Authorized, music user token: ${musicUserToken}`);
+                document.getElementById('easyModeButton').style.display = 'inline';
+                document.getElementById('mediumModeButton').style.display = 'inline';
+                document.getElementById('hardModeButton').style.display = 'inline';
                 document.getElementById('fetchLibraryButton').style.display = 'inline'; // Show fetch library button
                 document.getElementById('fetchPlaylistsButton').style.display = 'inline'; // Show fetch playlists button
                 document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
@@ -46,13 +51,29 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+
+        // TODO: AFTER THESE ARE CLICKED, SEND TO NEXT PAGE/BOX
+        // THEN CHECK FOR GAMEMODE WHEN PLAYING
+        document.getElementById('easyModeButton').addEventListener('click', () => {
+            gamemode = 0;
+            console.log('Game mode: ', gamemode);
+        });
+
+        document.getElementById('mediumModeButton').addEventListener('click', () => {
+            gamemode = 1;
+            console.log('Game mode: ', gamemode);
+        });
+
+        document.getElementById('hardModeButton').addEventListener('click', () => {
+            gamemode = 2;
+            console.log('Game mode: ', gamemode);
+        });
+
         document.getElementById('fetchLibraryButton').addEventListener('click', () => {
             fetchUserLibrary(music);
         });
 
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
-            // fetchUserPlaylists(music);
-            // showPage('page2');
             showPlaylists();
             window.history.pushState({}, '', '/playlists');
             router();
@@ -65,14 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('homeButton2').addEventListener('click', () => {
             reset();
-            // showPage('page1');
             window.history.pushState({}, '', '/');
             router();
         });
 
         document.getElementById('homeButton3').addEventListener('click', () => {
             reset();
-            // showPage('page1');
             window.history.pushState({}, '', '/');
             router();
         });
@@ -338,12 +357,20 @@ function play(songs) {
 
     displayItems([]);
 
-    document.getElementById('stats').style.display = 'inline';
     document.getElementById('guessInput').style.display = 'inline';
     document.getElementById('guessInput').addEventListener('input', () => {
         const searchTerm = document.getElementById('guessInput').value.toLowerCase();
         filterSongs(searchTerm);
     });
+    document.getElementById('stats').style.display = 'inline';
+
+    // show addTime button
+    if (playing && gamemode === (1 || 2)) {
+        document.getElementById('addTime').style.display = 'inline';
+        document.getElementById('addTime').addEventListener('click', () => {
+            playTime += 1000;
+        });
+    }
 
     // shuffle songs
     if (firstTime) {
@@ -372,8 +399,12 @@ function play(songs) {
                     console.log('Playback started');
                     setTimeout(() => {
                         music.pause();
-                        console.log('Playback paused');
-                    }, 2000);
+                        music.seekToTime(0).then(() => {
+                            console.log('Song restarted');
+                        }).catch(error => {
+                            console.error('Error restarting song');
+                        });
+                    }, playTime);
                 }).catch(error => {
                     console.error('Error starting playback:', error);
                 });
@@ -384,16 +415,18 @@ function play(songs) {
                     console.log('Playback started');
                     setTimeout(() => {
                         music.pause();
-                        console.log('Playback paused');
-                    }, 2000);
+                        music.seekToTime(0).then(() => {
+                            console.log('Song restarted');
+                        }).catch(error => {
+                            console.error('Error restarting song');
+                        });
+                    }, playTime);
                 }).catch(error => {
                     console.error('Error starting playback', error);
                 });
             } else {
                 console.log('something has gone terribly wrong');
             }
-            // // playSong(songs[songCount].id);
-            // playSong(songs);
         } else {
             endgame();
         }
