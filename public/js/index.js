@@ -1,4 +1,5 @@
 let songCount = 0;
+let prevSongCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let playlistSize = 0;
@@ -9,6 +10,7 @@ let songsWrong = [];
 let currentSongId = null;
 let currentSong = null;
 let selectedPlaylistId = null;
+let selectedPlaylist = null;
 let playing = false;
 let firstTime = false;
 let guess = false;
@@ -96,9 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function reset() {
     const music = MusicKit.getInstance();
     music.stop();
-    // const emptyArray = [''];
-    // music.setQueue(emptyArray);
-    // TODO: RESET QUEUE
     music.setQueue({songs: []}).then(r => {
         console.log('Playback queue reset successfully');
     }).catch((error) => {
@@ -106,6 +105,7 @@ function reset() {
     });
 
     songCount = 0;
+    prevSongCount = 0;
     correctCount = 0;
     incorrectCount = 0;
     playlistSize = 0;
@@ -115,6 +115,7 @@ function reset() {
     currentSongId = null;
     currentSong = null;
     selectedPlaylistId = null;
+    selectedPlaylist = null;
     playing = false;
     firstTime = false;
     guess = false;
@@ -278,7 +279,7 @@ function fetchPlaylistSongs(playlistId) {
 }
 
 /**
- * Displays items in passed list. Each item is
+ * Displays items in passed list. Each item has a listener
  * @param items
  */
 function displayItems(items) {
@@ -292,6 +293,7 @@ function displayItems(items) {
         li.classList.add('button', 'is-ghost', 'is-fullwidth');
         li.addEventListener('click', () => {
             if (!playing) {
+                selectedPlaylist = item;
                 selectedPlaylistId = item.id;
                 console.log(`Selected playlist:`, item);
                 showGame();
@@ -319,35 +321,12 @@ function shuffleArray(array) {
 }
 
 /**
- * Adds a song to the queue and plays it for 2 seconds
- * @param songId - song to play's ID
- */
-function playSong(songId) {
-    const music = MusicKit.getInstance();
-
-    music.setQueue({song: songId}).then(queue => {
-        console.log('Playback queue set:', queue);
-        music.play().then(() => {
-            console.log('Playback started');
-            currentSongId = songId;
-            setTimeout(() => {
-                music.pause();
-                console.log('Playback paused');
-            }, 2000);
-        }).catch(error => {
-            console.error('Error starting playback:', error);
-        });
-    }).catch(error => {
-        console.error('Error setting playback queue:', error);
-    });
-}
-
-/**
  * Plays the game
  *
  * @param songs - playlist songs to play
  */
 function play(songs) {
+    const music = MusicKit.getInstance();
     playing = true;
 
     // clear screen
@@ -370,14 +349,51 @@ function play(songs) {
     if (firstTime) {
         songs = shuffleArray(songs);
         firstTime = false;
+
+        music.setQueue({items: songs}).then(queue => {
+            console.log('Playback queue set', queue);
+        }).catch(error => {
+            console.log('Error setting playback queue', error);
+        });
     }
 
     console.log(songs);
 
     document.getElementById('playButton').addEventListener('click', () => {
+
+        currentSong = songs[songCount];
+        currentSongId = songs[songCount].id;
+
+        console.log(currentSongId);
+
         if (songCount < songs.length) {
-            currentSong = songs[songCount];
-            playSong(songs[songCount].id);
+            if (prevSongCount === songCount) {
+                music.play().then(() => {
+                    console.log('Playback started');
+                    setTimeout(() => {
+                        music.pause();
+                        console.log('Playback paused');
+                    }, 2000);
+                }).catch(error => {
+                    console.error('Error starting playback:', error);
+                });
+            } else if (prevSongCount < songCount) {
+                prevSongCount++;
+                console.log('getting here');
+                music.skipToNextItem().then(() => {
+                    console.log('Playback started');
+                    setTimeout(() => {
+                        music.pause();
+                        console.log('Playback paused');
+                    }, 2000);
+                }).catch(error => {
+                    console.error('Error starting playback', error);
+                });
+            } else {
+                console.log('something has gone terribly wrong');
+            }
+            // // playSong(songs[songCount].id);
+            // playSong(songs);
         } else {
             endgame();
         }
@@ -447,7 +463,6 @@ function showSongInfo(guess, song) {
 
     if (guess) {
         songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
-        music.stop();
         updateStats();
         console.log(songCount);
         console.log(playlistSize);
@@ -481,6 +496,8 @@ function endgame() {
     document.getElementById('songsWrong').textContent = "Songs you got wrong: " + songsWrong;
 
     stats.textContent = 'You finished! You got: ' + `${correctCount}` + '/' + `${incorrectCount + correctCount}` + " correct.";
+
+    music.stop();
 }
 
 // Routing
