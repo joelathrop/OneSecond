@@ -16,6 +16,7 @@ let selectedPlaylist = null;
 let playing = false;
 let firstTime = false;
 let guess = false;
+let addTimeUsage = false;
 const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRVNDUifQ.eyJpYXQiOjE3MjA4OTk3MTQsImV4cCI6MTczNjQ1MTcxNCwiaXNzIjoiMzNWODU3Tjc0NCJ9.zzlR2GUb829Brq-i_Y5l8RZNLjae34NC0Q4oexSpbZo7igEjc7jrbUOgU5OufcQGRJp5vxWUAiDmoMJh49YCww';
 
 // TODO: Saving/loading states?
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Authorized, music user token: ${musicUserToken}`);
                 document.getElementById('easyModeButton').style.display = 'inline';
                 document.getElementById('mediumModeButton').style.display = 'inline';
-                document.getElementById('hardModeButton').style.display = 'inline';
+                document.getElementById('challengeModeButton').style.display = 'inline';
                 document.getElementById('fetchLibraryButton').style.display = 'inline'; // Show fetch library button
                 document.getElementById('fetchPlaylistsButton').style.display = 'inline'; // Show fetch playlists button
                 document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
@@ -54,18 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // TODO: AFTER THESE ARE CLICKED, SEND TO NEXT PAGE/BOX
         // THEN CHECK FOR GAMEMODE WHEN PLAYING
-        document.getElementById('easyModeButton').addEventListener('click', () => {
+        document.getElementById('normalModeButton').addEventListener('click', () => {
             gamemode = 0;
             console.log('Game mode: ', gamemode);
         });
 
-        document.getElementById('mediumModeButton').addEventListener('click', () => {
+        document.getElementById('challengeModeButton').addEventListener('click', () => {
             gamemode = 1;
-            console.log('Game mode: ', gamemode);
-        });
-
-        document.getElementById('hardModeButton').addEventListener('click', () => {
-            gamemode = 2;
             console.log('Game mode: ', gamemode);
         });
 
@@ -96,12 +92,34 @@ document.addEventListener('DOMContentLoaded', () => {
             router();
         });
 
+        // add a second
+        document.getElementById('addTime').addEventListener('click', () => {
+            if (gamemode === 1) {
+                if (!addTimeUsage) {
+                    playTime += 2000;
+                    addTimeUsage = true;
+                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+                } else {
+                    // TODO : BULMA BUTTON SHAKE
+                    alert("You can't add any more time!");
+                }
+            } else if (gamemode === 0) {
+                if (playTime < 10000) {
+                    playTime += 1000;
+                    console.log('Play time:' + playTime);
+                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+                } else {
+                    alert("You can't add any more time!");
+                }
+            }
+        });
+
         document.getElementById('unauthorizeButton').addEventListener('click', () => {
             music.unauthorize();
             console.log('User has been unauthorized.');
-            document.getElementById('fetchLibraryButton').style.display = 'none'; // Hide fetch library button
+            document.getElementById('fetchLibraryButton').style.display = 'none';
             document.getElementById('fetchPlaylistsButton').style.display = 'none';
-            document.getElementById('unauthorizeButton').style.display = 'none'; // Hide unauthorize button
+            document.getElementById('unauthorizeButton').style.display = 'none';
         });
 
         window.onpopstate = router;
@@ -366,18 +384,6 @@ function play(songs) {
     });
     document.getElementById('stats').style.display = 'inline';
 
-    // show addTime button/label
-    document.getElementById('timeLabel').style.display = 'inline';
-    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
-    if (playing && gamemode !== 0) {
-        document.getElementById('addTime').style.display = 'inline';
-        document.getElementById('addTime').addEventListener('click', () => {
-            playTime += 1000;
-            console.log('Play time:' + playTime);
-            document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
-        });
-    }
-
     // shuffle songs
     if (firstTime) {
         songs = shuffleArray(songs);
@@ -390,15 +396,13 @@ function play(songs) {
         });
     }
 
+    // show addTime button/label
+    document.getElementById('timeLabel').style.display = 'inline';
+    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+
     console.log(songs);
 
     document.getElementById('playButton').addEventListener('click', () => {
-
-        // music.seekToTime(1).then(() => {
-        //     console.log('Song restarted');
-        // }).catch(error => {
-        //     console.error('Error restarting song', error);
-        // });
 
         currentSong = songs[songCount];
         currentSongId = songs[songCount].id;
@@ -417,7 +421,7 @@ function play(songs) {
                 });
             } else if (prevSongCount < songCount) {
                 prevSongCount++;
-                music.play().then(() => {
+                music.skipToNextItem().then(() => {
                     console.log('Playback started');
                     setTimeout(() => {
                         music.stop();
@@ -475,13 +479,15 @@ function songComparator(songId) {
         console.log('Guessed correctly');
         songCount++;
         correctCount++;
+        addTimeUsage = false;
         playTime = 1000;
         guess = true;
     } else {
         console.log('Guessed incorrectly');
         songCount++;
         incorrectCount++;
-        playTime = 1000;    // cuz we're still in the mode where it moves on after an incorrect guess
+        addTimeUsage = false;
+        playTime = 1000;
         guess = false;
     }
     showSongInfo(guess, currentSong);
