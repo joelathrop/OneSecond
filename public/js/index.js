@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('authorizeButton').addEventListener('click', () => {
             music.authorize().then((musicUserToken) => {
                 console.log(`Authorized, music user token: ${musicUserToken}`);
-                // document.getElementById('fetchLibraryButton').style.display = 'inline'; // Show fetch library button
-                // document.getElementById('fetchPlaylistsButton').style.display = 'inline'; // Show fetch playlists button
+                document.getElementById('normalModeButton').style.display = 'inline';
+                document.getElementById('challengeModeButton').style.display = 'inline';
                 document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
             }).catch((error) => {
                 console.error('Authorization error:', error);
@@ -359,6 +359,8 @@ function displayItems(items) {
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = '';
 
+    console.log(allPlaylists.toString());
+
     items.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item.attributes.name;
@@ -376,6 +378,7 @@ function displayItems(items) {
             }
         });
         itemList.appendChild(li);
+        // itemList.append(li);
     });
 }
 
