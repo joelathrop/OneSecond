@@ -4,7 +4,7 @@ let correctCount = 0;
 let incorrectCount = 0;
 let playlistSize = 0;
 let gamemode = -1;
-let playTime = 2000;
+let playTime = 1000;
 let music;
 let selectedPlaylistTracks = [];
 let allPlaylists = [];
@@ -128,6 +128,8 @@ function reset() {
     correctCount = 0;
     incorrectCount = 0;
     playlistSize = 0;
+    gamemode = -1;
+    playTime = 1000;
     allPlaylists = [];
     songsWrong = [];
     selectedPlaylistTracks = [];
@@ -364,11 +366,15 @@ function play(songs) {
     });
     document.getElementById('stats').style.display = 'inline';
 
-    // show addTime button
-    if (playing && gamemode === (1 || 2)) {
+    // show addTime button/label
+    document.getElementById('timeLabel').style.display = 'inline';
+    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+    if (playing && gamemode !== 0) {
         document.getElementById('addTime').style.display = 'inline';
         document.getElementById('addTime').addEventListener('click', () => {
             playTime += 1000;
+            console.log('Play time:' + playTime);
+            document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
         });
     }
 
@@ -474,12 +480,14 @@ function songComparator(songId) {
         console.log('Guessed correctly');
         songCount++;
         correctCount++;
+        playTime = 1000;
         guess = true;
     } else {
         console.log('Guessed incorrectly');
-        guess = false;
         songCount++;
         incorrectCount++;
+        playTime = 1000;    // cuz we're still in the mode where it moves on after an incorrect guess
+        guess = false;
     }
     showSongInfo(guess, currentSong);
 }
