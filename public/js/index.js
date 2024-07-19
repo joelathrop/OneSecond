@@ -394,6 +394,12 @@ function play(songs) {
 
     document.getElementById('playButton').addEventListener('click', () => {
 
+        // music.seekToTime(1).then(() => {
+        //     console.log('Song restarted');
+        // }).catch(error => {
+        //     console.error('Error restarting song', error);
+        // });
+
         currentSong = songs[songCount];
         currentSongId = songs[songCount].id;
 
@@ -404,31 +410,20 @@ function play(songs) {
                 music.play().then(() => {
                     console.log('Playback started');
                     setTimeout(() => {
-                        music.pause();
-                        music.seekToTime(0).then(() => {
-                            console.log('Song restarted');
-                        }).catch(error => {
-                            console.error('Error restarting song');
-                        });
+                        music.stop();
                     }, playTime);
                 }).catch(error => {
                     console.error('Error starting playback:', error);
                 });
             } else if (prevSongCount < songCount) {
                 prevSongCount++;
-                console.log('getting here');
-                music.skipToNextItem().then(() => {
+                music.play().then(() => {
                     console.log('Playback started');
                     setTimeout(() => {
-                        music.pause();
-                        music.seekToTime(0).then(() => {
-                            console.log('Song restarted');
-                        }).catch(error => {
-                            console.error('Error restarting song');
-                        });
+                        music.stop();
                     }, playTime);
                 }).catch(error => {
-                    console.error('Error starting playback', error);
+                    console.error('Error starting playback:', error);
                 });
             } else {
                 console.log('something has gone terribly wrong');
