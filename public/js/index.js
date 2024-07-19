@@ -184,7 +184,7 @@ function reset() {
  */
 function updateStats() {
     // TODO: CHANGE TO CORRECT/PLAYLIST LENGTH?
-    document.getElementById('stats').textContent = `Score: ${correctCount} / ${correctCount + incorrectCount}`
+    document.getElementById('stats').textContent = `Score: ${correctCount} / ${selectedPlaylistTracks.length}`
 }
 
 /**
@@ -480,7 +480,7 @@ function songComparator(songId) {
     if (songId === currentSongId) {
         console.log('Guessed correctly');
         songCount++;
-        correctCount++;
+        correctCount++;     // TODO: MAKE SURE TO SHOW STATS ON THIS IN NORMAL MODE! MIGHT NOT BE 3/3 in the first second for example. Maybe first 3 seconds?
         addTimeUsage = false;
         playTime = 1000;
         guess = true;
@@ -520,6 +520,7 @@ function showSongInfo(guess, song) {
         updateStats();
         console.log(songCount);
         console.log(playlistSize);
+        music.stop();
         if (playlistSize === songCount) {
             endgame();
         } else {
@@ -549,7 +550,7 @@ function endgame() {
     document.getElementById('songsWrong').style.display = 'inline';
     document.getElementById('songsWrong').textContent = "Songs you got wrong: " + songsWrong;
 
-    stats.textContent = 'You finished! You got: ' + `${correctCount}` + '/' + `${incorrectCount + correctCount}` + " correct.";
+    stats.textContent = 'You finished! You got: ' + `${correctCount}` + '/' + `${selectedPlaylistTracks.length}` + " correct.";
 
     music.stop();
 }
