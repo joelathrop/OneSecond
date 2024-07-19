@@ -114,6 +114,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        document.getElementById('giveUpButton').addEventListener('click', () => {
+           document.getElementById('songList').textContent = 'That song was: ' + `${currentSong.attributes.name}`
+               + ' by ' + `${currentSong.attributes.artistName}`;
+           songsWrong.push(" " + currentSong.attributes.name);
+           songCount++;
+           playTime = 1000;
+           music.stop();
+           if (playlistSize === songCount) {
+               endgame();
+           } else {
+               play(selectedPlaylistTracks);
+           }
+
+           // what else to update??
+        });
+
         document.getElementById('unauthorizeButton').addEventListener('click', () => {
             music.unauthorize();
             console.log('User has been unauthorized.');
@@ -183,7 +199,6 @@ function reset() {
  * Dynamically updates the score while the game is in progress
  */
 function updateStats() {
-    // TODO: CHANGE TO CORRECT/PLAYLIST LENGTH?
     document.getElementById('stats').textContent = `Score: ${correctCount} / ${selectedPlaylistTracks.length}`
 }
 
@@ -376,6 +391,7 @@ function play(songs) {
     document.getElementById('unauthorizeButton').style.display = 'none';
     document.getElementById('fetchLibraryButton').style.display = 'none';
     document.getElementById('fetchPlaylistsButton').style.display = 'none';
+    document.getElementById('giveUpButton').style.display = 'none';
 
     displayItems([]);
 
@@ -398,9 +414,12 @@ function play(songs) {
         });
     }
 
-    // show addTime button/label
+    // show addTime button/label & give up button
     document.getElementById('timeLabel').style.display = 'inline';
     document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+    if (gamemode === 0) {
+        document.getElementById('giveUpButton').style.display = 'inline';
+    }
 
     console.log(songs);
 
@@ -491,7 +510,7 @@ function songComparator(songId) {
             incorrectCount++;   // TODO: THIS IS GOING TO MAKE SCORE SHOW UP WEIRD
             guess = false;
             music.stop();
-            // songsWrong.push(" " + song.attributes.name);     // TODO: SONG!
+            songsWrong.push(" " + currentSong.attributes.name);     // TODO: Prolly gonna make songs show up multiple times
             document.getElementById('songList').textContent = 'Incorrect, try again.';
             play(selectedPlaylistTracks);
         } else {
