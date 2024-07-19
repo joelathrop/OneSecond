@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // show/hide necessary buttons
+    document.getElementById('fetchLibraryButton').style.display = 'none';
+    document.getElementById('fetchPlaylistsButton').style.display = 'none';
+    document.getElementById('normalModeButton').style.display = 'inline';
+    document.getElementById('challengeModeButton').style.display = 'inline';
+
     setTimeout(() => {
         music = MusicKit.getInstance();
 
@@ -41,11 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('authorizeButton').addEventListener('click', () => {
             music.authorize().then((musicUserToken) => {
                 console.log(`Authorized, music user token: ${musicUserToken}`);
-                document.getElementById('easyModeButton').style.display = 'inline';
-                document.getElementById('mediumModeButton').style.display = 'inline';
-                document.getElementById('challengeModeButton').style.display = 'inline';
-                document.getElementById('fetchLibraryButton').style.display = 'inline'; // Show fetch library button
-                document.getElementById('fetchPlaylistsButton').style.display = 'inline'; // Show fetch playlists button
+                // document.getElementById('fetchLibraryButton').style.display = 'inline'; // Show fetch library button
+                // document.getElementById('fetchPlaylistsButton').style.display = 'inline'; // Show fetch playlists button
                 document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
             }).catch((error) => {
                 console.error('Authorization error:', error);
@@ -58,11 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('normalModeButton').addEventListener('click', () => {
             gamemode = 0;
             console.log('Game mode: ', gamemode);
+            document.getElementById('fetchLibraryButton').style.display = 'inline';
+            document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+            document.getElementById('normalModeButton').style.display = 'none';
+            document.getElementById('challengeModeButton').style.display = 'none';
         });
 
         document.getElementById('challengeModeButton').addEventListener('click', () => {
             gamemode = 1;
             console.log('Game mode: ', gamemode);
+            document.getElementById('fetchLibraryButton').style.display = 'inline';
+            document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+            document.getElementById('normalModeButton').style.display = 'none';
+            document.getElementById('challengeModeButton').style.display = 'none';
         });
 
         document.getElementById('fetchLibraryButton').addEventListener('click', () => {
@@ -149,13 +160,17 @@ document.addEventListener('DOMContentLoaded', () => {
  * search bars, and the game statistics
  */
 function reset() {
-    const music = MusicKit.getInstance();
-    music.stop();
-    music.setQueue({songs: []}).then(r => {
-        console.log('Playback queue reset successfully');
-    }).catch((error) => {
-        console.error('Failed to reset the playback queue:', error);
-    });
+
+    // TODO: Error here before game is over?
+    if (playing && (songCount < selectedPlaylistTracks.length)) {
+        const music = MusicKit.getInstance();
+        music.stop();
+        music.setQueue({songs: []}).then(r => {
+            console.log('Playback queue reset successfully');
+        }).catch((error) => {
+            console.error('Failed to reset the playback queue:', error);
+        });
+    }
 
     songCount = 0;
     prevSongCount = 0;
@@ -187,8 +202,10 @@ function reset() {
     document.getElementById('searchInput').style.display = 'none';
     document.getElementById('authorizeButton').style.display = 'inline';
     document.getElementById('unauthorizeButton').style.display = 'inline';
-    document.getElementById('fetchLibraryButton').style.display = 'inline';
-    document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+    document.getElementById('normalModeButton').style.display = 'inline';
+    document.getElementById('challengeModeButton').style.display = 'inline';
+    document.getElementById('fetchLibraryButton').style.display = 'none';
+    document.getElementById('fetchPlaylistsButton').style.display = 'none';
     document.getElementById('guessInput').style.display = 'none';
     document.getElementById('songsWrong').style.display = 'none';
 
@@ -614,30 +631,30 @@ function showGame() {
 
 // TODO: ???
 
-document.addEventListener('DOMContentLoaded', () => {
-    const difficultySelection = document.getElementById('difficultySelection');
-    const mainSection = document.getElementById('mainSection');
-    
-    const easyButton = document.getElementById('easyButton');
-    const mediumButton = document.getElementById('mediumButton');
-    const hardButton = document.getElementById('hardButton');
-
-    easyButton.addEventListener('click', () => {
-        difficultySelection.style.display = 'none';
-        mainSection.style.display = 'block';
-        // You can add logic here for easy difficulty
-    });
-
-    mediumButton.addEventListener('click', () => {
-        difficultySelection.style.display = 'none';
-        mainSection.style.display = 'block';
-        // You can add logic here for medium difficulty
-    });
-
-    hardButton.addEventListener('click', () => {
-        difficultySelection.style.display = 'none';
-        mainSection.style.display = 'block';
-        // You can add logic here for hard difficulty
-    });
-
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     const difficultySelection = document.getElementById('difficultySelection');
+//     const mainSection = document.getElementById('mainSection');
+//
+//     const easyButton = document.getElementById('easyButton');
+//     const mediumButton = document.getElementById('mediumButton');
+//     const hardButton = document.getElementById('hardButton');
+//
+//     easyButton.addEventListener('click', () => {
+//         difficultySelection.style.display = 'none';
+//         mainSection.style.display = 'block';
+//         // You can add logic here for easy difficulty
+//     });
+//
+//     mediumButton.addEventListener('click', () => {
+//         difficultySelection.style.display = 'none';
+//         mainSection.style.display = 'block';
+//         // You can add logic here for medium difficulty
+//     });
+//
+//     hardButton.addEventListener('click', () => {
+//         difficultySelection.style.display = 'none';
+//         mainSection.style.display = 'block';
+//         // You can add logic here for hard difficulty
+//     });
+//
+// });
