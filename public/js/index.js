@@ -158,6 +158,7 @@ function reset() {
     playing = false;
     firstTime = false;
     guess = false;
+    addTimeUsage = false;
 
     // what is the difference between textContent and innerHTML
     // and what is the difference between innerHTML and innerText
@@ -182,6 +183,7 @@ function reset() {
  * Dynamically updates the score while the game is in progress
  */
 function updateStats() {
+    // TODO: CHANGE TO CORRECT/PLAYLIST LENGTH?
     document.getElementById('stats').textContent = `Score: ${correctCount} / ${correctCount + incorrectCount}`
 }
 
@@ -482,15 +484,25 @@ function songComparator(songId) {
         addTimeUsage = false;
         playTime = 1000;
         guess = true;
+        showSongInfo(guess, currentSong);
     } else {
         console.log('Guessed incorrectly');
-        songCount++;
-        incorrectCount++;
-        addTimeUsage = false;
-        playTime = 1000;
-        guess = false;
+        if (gamemode === 0) {
+            incorrectCount++;   // TODO: THIS IS GOING TO MAKE SCORE SHOW UP WEIRD
+            guess = false;
+            music.stop();
+            // songsWrong.push(" " + song.attributes.name);     // TODO: SONG!
+            document.getElementById('songList').textContent = 'Incorrect, try again.';
+            play(selectedPlaylistTracks);
+        } else {
+            songCount++;
+            incorrectCount++;
+            addTimeUsage = false;
+            playTime = 1000;
+            guess = false;
+            showSongInfo(guess, currentSong);
+        }
     }
-    showSongInfo(guess, currentSong);
 }
 
 /**
