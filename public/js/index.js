@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fetchPlaylistsButton').style.display = 'none';
     document.getElementById('normalModeButton').style.display = 'inline';
     document.getElementById('challengeModeButton').style.display = 'inline';
+    document.getElementById('backButton').style.display = 'none';
 
     setTimeout(() => {
         music = MusicKit.getInstance();
@@ -55,9 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-
-        // TODO: AFTER THESE ARE CLICKED, SEND TO NEXT PAGE/BOX
-        // THEN CHECK FOR GAMEMODE WHEN PLAYING
         document.getElementById('normalModeButton').addEventListener('click', () => {
             gamemode = 0;
             console.log('Game mode: ', gamemode);
@@ -65,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fetchPlaylistsButton').style.display = 'inline';
             document.getElementById('normalModeButton').style.display = 'none';
             document.getElementById('challengeModeButton').style.display = 'none';
+            document.getElementById('backButton').style.display = 'inline';
         });
 
         document.getElementById('challengeModeButton').addEventListener('click', () => {
@@ -74,13 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fetchPlaylistsButton').style.display = 'inline';
             document.getElementById('normalModeButton').style.display = 'none';
             document.getElementById('challengeModeButton').style.display = 'none';
+            document.getElementById('backButton').style.display = 'inline';
         });
 
         document.getElementById('fetchLibraryButton').addEventListener('click', () => {
+            document.getElementById('backButton').style.display = 'none';
             fetchUserLibrary(music);
         });
 
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
+            document.getElementById('backButton').style.display = 'none';
             showPlaylists();
             window.history.pushState({}, '', '/playlists');
             router();
@@ -101,6 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
             reset();
             window.history.pushState({}, '', '/');
             router();
+        });
+
+        document.getElementById('backButton').addEventListener('click', () => {
+            document.getElementById('fetchLibraryButton').style.display = 'none';
+            document.getElementById('fetchPlaylistsButton').style.display = 'none';
+            document.getElementById('normalModeButton').style.display = 'inline';
+            document.getElementById('challengeModeButton').style.display = 'inline';
+
+            document.getElementById('backButton').style.display = 'none';
         });
 
         // add a second
@@ -200,6 +211,7 @@ function reset() {
 
     // Ensure necessary buttons and inputs are hidden/shown
     document.getElementById('searchInput').style.display = 'none';
+    document.getElementById('backButton').style.display = 'none';
     document.getElementById('authorizeButton').style.display = 'inline';
     document.getElementById('unauthorizeButton').style.display = 'inline';
     document.getElementById('normalModeButton').style.display = 'inline';
@@ -496,8 +508,6 @@ function filterPlaylists(searchTerm) {
  */
 function filterSongs(searchTerm) {
     // hide songs if nothing in the search bar
-    // TODO: Also want to limit shown songs to if 2 or 3+ characters match.
-    // BUT, can't do this because what if the song is only 1 or 2 characters?
     if (searchTerm.trim() === '') {
         displayItems([]);
         return;
@@ -527,10 +537,10 @@ function songComparator(songId) {
     } else {
         console.log('Guessed incorrectly');
         if (gamemode === 0) {
-            incorrectCount++;   // TODO: THIS IS GOING TO MAKE SCORE SHOW UP WEIRD
+            incorrectCount++;
             guess = false;
             music.stop();
-            songsWrong.push(" " + currentSong.attributes.name);     // TODO: Prolly gonna make songs show up multiple times
+            songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('songList').textContent = 'Incorrect, try again.';
             play(selectedPlaylistTracks);
         } else {
