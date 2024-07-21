@@ -242,6 +242,7 @@ function reset() {
     updateStats();
 }
 
+
 /**
  * Dynamically updates the score while the game is in progress
  */
