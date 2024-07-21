@@ -1,3 +1,5 @@
+let music;
+
 let songCount = 0;
 let prevSongCount = 0;
 let correctCount = 0;
@@ -5,18 +7,25 @@ let incorrectCount = 0;
 let playlistSize = 0;
 let gamemode = -1;
 let playTime = 1000;
-let music;
-let selectedPlaylistTracks = [];
-let allPlaylists = [];
-let songsWrong = [];
+
 let currentSongId = null;
 let currentSong = null;
 let selectedPlaylistId = null;
 let selectedPlaylist = null;
+
+let librarySongs = [];
+let selectedPlaylistTracks = [];
+let allPlaylists = [];
+let songsWrong = [];
+
 let playing = false;
+let playWithLibrary = false;
 let firstTime = false;
 let guess = false;
 let addTimeUsage = false;
+
+let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
+const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
 const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRVNDUifQ.eyJpYXQiOjE3MjA4OTk3MTQsImV4cCI6MTczNjQ1MTcxNCwiaXNzIjoiMzNWODU3Tjc0NCJ9.zzlR2GUb829Brq-i_Y5l8RZNLjae34NC0Q4oexSpbZo7igEjc7jrbUOgU5OufcQGRJp5vxWUAiDmoMJh49YCww';
 
 // TODO: Saving/loading states?
@@ -78,12 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('fetchLibraryButton').addEventListener('click', () => {
             document.getElementById('backButton').style.display = 'none';
-            fetchUserLibrary(music);
+            playWithLibrary = true;
+            window.history.pushState({}, '', '/library/play');
+            router();
         });
 
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
             document.getElementById('backButton').style.display = 'none';
-            showPlaylists();
             window.history.pushState({}, '', '/playlists');
             router();
         });
@@ -120,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!addTimeUsage) {
                     playTime += 2000;
                     addTimeUsage = true;
-                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
                 } else {
                     // TODO : BULMA BUTTON SHAKE
                     alert("You can't add any more time!");
@@ -137,19 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('giveUpButton').addEventListener('click', () => {
-           document.getElementById('songList').textContent = 'That song was: ' + `${currentSong.attributes.name}`
-               + ' by ' + `${currentSong.attributes.artistName}`;
-           songsWrong.push(" " + currentSong.attributes.name);
-           songCount++;
-           playTime = 1000;
-           music.stop();
-           if (playlistSize === songCount) {
-               endgame();
-           } else {
-               play(selectedPlaylistTracks);
-           }
+            document.getElementById('songList').textContent = 'That song was: ' + `${currentSong.attributes.name}`
+                + ' by ' + `${currentSong.attributes.artistName}`;
+            songsWrong.push(" " + currentSong.attributes.name);
+            songCount++;
+            playTime = 1000;
+            music.stop();
+            if (playlistSize === songCount) {
+                endgame();
+            } else {
+                play(selectedPlaylistTracks);
+            }
 
-           // what else to update??
+            // what else to update??
         });
 
         document.getElementById('unauthorizeButton').addEventListener('click', () => {
@@ -163,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.onpopstate = router;
 
         router();
-    }, 1000);
+    }, 500);
 });
 
 /**
@@ -198,6 +208,7 @@ function reset() {
     selectedPlaylistId = null;
     selectedPlaylist = null;
     playing = false;
+    playWithLibrary = false;
     firstTime = false;
     guess = false;
     addTimeUsage = false;
@@ -238,6 +249,8 @@ function updateStats() {
  * @param music - MusicKit instance
  */
 function fetchUserLibrary(music) {
+    // hide everything and tell em to wait a dam second
+
     console.log('Fetching user library...');
     const musicUserToken = music.musicUserToken;
 
@@ -246,27 +259,44 @@ function fetchUserLibrary(music) {
         return;
     }
 
-    const url = 'https://api.music.apple.com/v1/me/library/songs?limit=20';
-
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${developerToken}`,
-            'Music-User-Token': musicUserToken
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+    function fetchLibraryPage(url) {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${developerToken}`,
+                'Music-User-Token': musicUserToken
             }
-            return response.json();
         })
-        .then(data => {
-            displayItems(data.data);
-        })
-        .catch(error => {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                librarySongs.push(...data.data);
+                console.log("library length: " + librarySongs.length);
+
+                console.log(data.next);
+
+                if (data.next) {
+                    let nextUrl = new URL(data.next, libraryURL).href;
+                    if (!nextUrl.includes('limit=')) {
+                        nextUrl += '&limit=100';
+                    }
+                    fetchLibraryPage(nextUrl);
+                } else {
+                    console.log('Finished fetching all library songs.');
+                    firstTime = true;
+                    playlistSize = librarySongs.length;
+                    play(librarySongs);
+                }
+            }).catch(error => {
             console.error('Error fetching library: ', error);
-        })
+        });
+    }
+
+    fetchLibraryPage(libraryURL);
 }
 
 /**
@@ -286,9 +316,8 @@ function fetchUserPlaylists(music) {
 
     // Clear the allPlaylists array before fetching new data
     allPlaylists = [];
-    const url = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
 
-    fetchPlaylistsPage(url);
+    fetchPlaylistsPage(playlistsURL);
 }
 
 /**
@@ -316,6 +345,7 @@ function fetchPlaylistsPage(nextUrl) {
             if (data.next) {
                 fetchPlaylistsPage(data.next);
             } else {
+                console.log("num of playlists: " + allPlaylists.length);
                 displayItems(allPlaylists);
             }
         })
@@ -448,7 +478,7 @@ function play(songs) {
 
     // show addTime button/label & give up button
     document.getElementById('timeLabel').style.display = 'inline';
-    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime/1000;
+    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
     if (gamemode === 0) {
         document.getElementById('giveUpButton').style.display = 'inline';
     }
@@ -507,15 +537,22 @@ function filterPlaylists(searchTerm) {
  * @param searchTerm
  */
 function filterSongs(searchTerm) {
+    let filteredSongs;
     // hide songs if nothing in the search bar
     if (searchTerm.trim() === '') {
         displayItems([]);
         return;
     }
 
-    const filteredSongs = selectedPlaylistTracks.filter(song =>
-        song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (playWithLibrary) {
+        filteredSongs = librarySongs.filter(song =>
+            song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    } else {
+        filteredSongs = selectedPlaylistTracks.filter(song =>
+            song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
 
     displayItems(filteredSongs);
 }
@@ -609,6 +646,7 @@ const routes = {
     '/': showHome,
     '/playlists': showPlaylists,
     '/playlists/play': showGame,
+    '/library/play': showGame,
 };
 
 function router() {
@@ -636,10 +674,13 @@ function showPlaylists() {
 
 function showGame() {
     showPage('page3');
-    fetchPlaylistSongs(selectedPlaylistId);
+
+    if (playWithLibrary) {
+        fetchUserLibrary(music);
+    } else {
+        fetchPlaylistSongs(selectedPlaylistId);
+    }
 }
-
-
 
 
 // TODO: ???
