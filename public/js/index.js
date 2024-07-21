@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('normalModeButton').style.display = 'inline';
     document.getElementById('challengeModeButton').style.display = 'inline';
     document.getElementById('backButton').style.display = 'none';
+    document.getElementById('loadingMsg').style.display = 'none';
 
     setTimeout(() => {
         music = MusicKit.getInstance();
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('giveUpButton').addEventListener('click', () => {
             document.getElementById('songList').textContent = 'That song was: ' + `${currentSong.attributes.name}`
-                + ' by ' + `${currentSong.attributes.artistName}`;
+                + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
             songsWrong.push(" " + currentSong.attributes.name);
             songCount++;
             playTime = 1000;
@@ -156,7 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (playlistSize === songCount) {
                 endgame();
             } else {
-                play(selectedPlaylistTracks);
+                if (playWithLibrary) {
+                    play(librarySongs);
+                } else {
+                    play(selectedPlaylistTracks);
+                }
             }
 
             // what else to update??
@@ -200,6 +205,7 @@ function reset() {
     playlistSize = 0;
     gamemode = -1;
     playTime = 1000;
+    librarySongs = [];
     allPlaylists = [];
     songsWrong = [];
     selectedPlaylistTracks = [];
@@ -231,6 +237,7 @@ function reset() {
     document.getElementById('fetchPlaylistsButton').style.display = 'none';
     document.getElementById('guessInput').style.display = 'none';
     document.getElementById('songsWrong').style.display = 'none';
+    document.getElementById('loadingMsg').style.display = 'none';
 
     updateStats();
 }
@@ -250,6 +257,15 @@ function updateStats() {
  */
 function fetchUserLibrary(music) {
     // hide everything and tell em to wait a dam second
+    // TODO: HIDE TIME AND SCORE?
+    document.getElementById('playButton').style.display = 'none';
+    document.getElementById('guessInput').style.display = 'none';
+    document.getElementById('addTime').style.display = 'none';
+    document.getElementById('giveUpButton').style.display = 'none';
+    document.getElementById('homeButton3').style.display = 'none';
+    document.getElementById('stats').style.display = 'none';
+
+    document.getElementById('loadingMsg').style.display = 'inline';
 
     console.log('Fetching user library...');
     const musicUserToken = music.musicUserToken;
@@ -360,10 +376,41 @@ function fetchPlaylistsPage(nextUrl) {
  * @param playlistId - Playlist's ID
  */
 function fetchPlaylistSongs(playlistId) {
-    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks`;
+    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks?limit=100`;
     // showGame();
     document.getElementById('guessInput').style.display = 'inline';
+    fetchPlaylistSongsPage(url);
 
+    // fetch(url, {
+    //     method: 'GET',
+    //     headers: {
+    //         'Authorization': `Bearer ${developerToken}`,
+    //         'Music-User-Token': music.musicUserToken
+    //     }
+    // })
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error('Network response was not ok');
+    //         }
+    //         return response.json(); // Parse JSON response
+    //     })
+    //     .then(data => {
+    //         if (data.data) {
+    //             selectedPlaylistTracks = data.data;
+    //             console.log('Tracks in the playlist:', selectedPlaylistTracks);
+    //             firstTime = true;
+    //             playlistSize = selectedPlaylistTracks.length;
+    //             play(selectedPlaylistTracks);
+    //         } else {
+    //             console.error('No tracks found in the playlist response:', data);
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error('Error fetching playlist songs:', error);
+    //     });
+}
+
+function fetchPlaylistSongsPage(url) {
     fetch(url, {
         method: 'GET',
         headers: {
@@ -375,18 +422,23 @@ function fetchPlaylistSongs(playlistId) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json(); // Parse JSON response
+            return response.json();
         })
         .then(data => {
-            if (data.data) {
-                selectedPlaylistTracks = data.data;
-                console.log('Tracks in the playlist:', selectedPlaylistTracks);
+            selectedPlaylistTracks.push(...data.data);
+            while (data.next) {
+                console.log('Fetching next page:', data.next);
+                selectedPlaylistTracks.push(...data.next);
+                // fetchPlaylistSongsPage(data.next.href);
+            }
+            //
+            // if (data.next) {
+            // } else {
+                console.log('Total tracks in the playlist:', selectedPlaylistTracks.length);
                 firstTime = true;
                 playlistSize = selectedPlaylistTracks.length;
                 play(selectedPlaylistTracks);
-            } else {
-                console.error('No tracks found in the playlist response:', data);
-            }
+            // }
         })
         .catch(error => {
             console.error('Error fetching playlist songs:', error);
@@ -444,6 +496,15 @@ function shuffleArray(array) {
  * @param songs - playlist songs to play
  */
 function play(songs) {
+    if (playWithLibrary) {
+        document.getElementById('playButton').style.display = 'inline';
+        document.getElementById('guessInput').style.display = 'inline';
+        document.getElementById('addTime').style.display = 'inline';
+        document.getElementById('giveUpButton').style.display = 'inline';
+        document.getElementById('homeButton3').style.display = 'inline';
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('stats').style.display = 'inline';
+    }
     const music = MusicKit.getInstance();
     playing = true;
 
@@ -579,7 +640,11 @@ function songComparator(songId) {
             music.stop();
             songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('songList').textContent = 'Incorrect, try again.';
-            play(selectedPlaylistTracks);
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
         } else {
             songCount++;
             incorrectCount++;
@@ -610,7 +675,11 @@ function showSongInfo(guess, song) {
         if (playlistSize === songCount) {
             endgame();
         } else {
-            play(selectedPlaylistTracks);
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
         }
     } else {
         songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
@@ -622,7 +691,11 @@ function showSongInfo(guess, song) {
         if (playlistSize === songCount) {
             endgame();
         } else {
-            play(selectedPlaylistTracks);
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
         }
     }
 }
