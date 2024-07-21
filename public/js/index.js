@@ -377,8 +377,7 @@ function fetchPlaylistsPage(nextUrl) {
  * @param playlistId - Playlist's ID
  */
 function fetchPlaylistSongs(playlistId) {
-    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks?limit=100`;
-    // showGame();
+    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks?limit=100`;    // took away ?limit=100
     document.getElementById('guessInput').style.display = 'inline';
     fetchPlaylistSongsPage(url);
 
@@ -427,19 +426,25 @@ function fetchPlaylistSongsPage(url) {
         })
         .then(data => {
             selectedPlaylistTracks.push(...data.data);
-            while (data.next) {
+            // while (data.next) {
+            //     console.log('Fetching next page:', data.next);
+            //     selectedPlaylistTracks.push(...data.next);
+            //     // fetchPlaylistSongsPage(data.next.href);
+            // }
+            console.log("here " + selectedPlaylist.relationships.tracks.data);
+            console.log("library playlist songs?? " + data.data.length + " " + data.data);
+            console.log("library playlist next songs?? " + data.next.length + " " + data.next.tracks);
+            if (data.next) {
                 console.log('Fetching next page:', data.next);
-                selectedPlaylistTracks.push(...data.next);
-                // fetchPlaylistSongsPage(data.next.href);
-            }
-            //
-            // if (data.next) {
-            // } else {
+                // selectedPlaylistTracks.push(...data.next);
+                console.log(data.next);
+                fetchPlaylistSongsPage(data.next);
+            } else {
                 console.log('Total tracks in the playlist:', selectedPlaylistTracks.length);
                 firstTime = true;
                 playlistSize = selectedPlaylistTracks.length;
                 play(selectedPlaylistTracks);
-            // }
+            }
         })
         .catch(error => {
             console.error('Error fetching playlist songs:', error);
