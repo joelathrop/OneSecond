@@ -7,6 +7,7 @@ let incorrectCount = 0;
 let playlistSize = 0;
 let gamemode = -1;
 let playTime = 1000;
+let offset = 100;
 
 let currentSongId = null;
 let currentSong = null;
@@ -205,6 +206,7 @@ function reset() {
     playlistSize = 0;
     gamemode = -1;
     playTime = 1000;
+    offset = 100;
     librarySongs = [];
     allPlaylists = [];
     songsWrong = [];
@@ -377,40 +379,14 @@ function fetchPlaylistsPage(nextUrl) {
  * @param playlistId - Playlist's ID
  */
 function fetchPlaylistSongs(playlistId) {
-    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks?limit=100`;    // took away ?limit=100
+    const url = `https://api.music.apple.com/v1/me/library/playlists/${playlistId}/tracks`;    // took away /tracks
     document.getElementById('guessInput').style.display = 'inline';
     fetchPlaylistSongsPage(url);
-
-    // fetch(url, {
-    //     method: 'GET',
-    //     headers: {
-    //         'Authorization': `Bearer ${developerToken}`,
-    //         'Music-User-Token': music.musicUserToken
-    //     }
-    // })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok');
-    //         }
-    //         return response.json(); // Parse JSON response
-    //     })
-    //     .then(data => {
-    //         if (data.data) {
-    //             selectedPlaylistTracks = data.data;
-    //             console.log('Tracks in the playlist:', selectedPlaylistTracks);
-    //             firstTime = true;
-    //             playlistSize = selectedPlaylistTracks.length;
-    //             play(selectedPlaylistTracks);
-    //         } else {
-    //             console.error('No tracks found in the playlist response:', data);
-    //         }
-    //     })
-    //     .catch(error => {
-    //         console.error('Error fetching playlist songs:', error);
-    //     });
 }
 
 function fetchPlaylistSongsPage(url) {
+    let fetchCount = 0;
+
     fetch(url, {
         method: 'GET',
         headers: {
@@ -425,20 +401,12 @@ function fetchPlaylistSongsPage(url) {
             return response.json();
         })
         .then(data => {
-            selectedPlaylistTracks.push(...data.data);
-            // while (data.next) {
-            //     console.log('Fetching next page:', data.next);
-            //     selectedPlaylistTracks.push(...data.next);
-            //     // fetchPlaylistSongsPage(data.next.href);
-            // }
-            console.log("here " + selectedPlaylist.relationships.tracks.data);
-            console.log("library playlist songs?? " + data.data.length + " " + data.data);
-            console.log("library playlist next songs?? " + data.next.length + " " + data.next.tracks);
-            if (data.next) {
-                console.log('Fetching next page:', data.next);
-                // selectedPlaylistTracks.push(...data.next);
-                console.log(data.next);
-                fetchPlaylistSongsPage(data.next);
+            if (data.data.length <= 100) {  // TODO: There's gotta be a better way to do this but how
+                selectedPlaylistTracks.push(...data.data);
+                fetchPlaylistSongsPage(`https://api.music.apple.com/v1/me/library/playlists/${selectedPlaylistId}/tracks?offset=${offset}`);
+                offset += 100;
+                console.log('offset' + offset);
+
             } else {
                 console.log('Total tracks in the playlist:', selectedPlaylistTracks.length);
                 firstTime = true;
@@ -447,7 +415,12 @@ function fetchPlaylistSongsPage(url) {
             }
         })
         .catch(error => {
-            console.error('Error fetching playlist songs:', error);
+            console.log('Error fetching playlist songs; may have reached end of playlist pagination:', error);
+
+            console.log('Total tracks in the playlist:', selectedPlaylistTracks.length);
+            firstTime = true;
+            playlistSize = selectedPlaylistTracks.length;
+            play(selectedPlaylistTracks);
         });
 }
 
@@ -459,7 +432,7 @@ function displayItems(items) {
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = '';
 
-    console.log(allPlaylists.toString());
+    // console.log(allPlaylists.toString());
 
     items.forEach(item => {
         const li = document.createElement('li');
