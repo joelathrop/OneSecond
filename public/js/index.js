@@ -385,8 +385,6 @@ function fetchPlaylistSongs(playlistId) {
 }
 
 function fetchPlaylistSongsPage(url) {
-    let fetchCount = 0;
-
     fetch(url, {
         method: 'GET',
         headers: {
@@ -733,34 +731,3 @@ function showGame() {
         fetchPlaylistSongs(selectedPlaylistId);
     }
 }
-
-
-// TODO: ???
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     const difficultySelection = document.getElementById('difficultySelection');
-//     const mainSection = document.getElementById('mainSection');
-//
-//     const easyButton = document.getElementById('easyButton');
-//     const mediumButton = document.getElementById('mediumButton');
-//     const hardButton = document.getElementById('hardButton');
-//
-//     easyButton.addEventListener('click', () => {
-//         difficultySelection.style.display = 'none';
-//         mainSection.style.display = 'block';
-//         // You can add logic here for easy difficulty
-//     });
-//
-//     mediumButton.addEventListener('click', () => {
-//         difficultySelection.style.display = 'none';
-//         mainSection.style.display = 'block';
-//         // You can add logic here for medium difficulty
-//     });
-//
-//     hardButton.addEventListener('click', () => {
-//         difficultySelection.style.display = 'none';
-//         mainSection.style.display = 'block';
-//         // You can add logic here for hard difficulty
-//     });
-//
-// });
