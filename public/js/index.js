@@ -5,7 +5,7 @@ let prevSongCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let playlistSize = 0;
-let gamemode = -1;
+let gamemode = -1;  // 0: NORMAL // 1: CHALLENGE
 let playTime = 1000;
 let offset = 100;
 
@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // show/hide necessary buttons
+    // show/hide necessary buttons/headers
+    document.getElementById('difficultyHeader').style.display = 'inline';
+    document.getElementById('collectionHeader').style.display = 'none';
     document.getElementById('fetchLibraryButton').style.display = 'none';
     document.getElementById('fetchPlaylistsButton').style.display = 'none';
     document.getElementById('normalModeButton').style.display = 'inline';
@@ -70,6 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('normalModeButton').addEventListener('click', () => {
             gamemode = 0;
             console.log('Game mode: ', gamemode);
+            document.getElementById('difficultyHeader').style.display = 'none';
+            document.getElementById('collectionHeader').style.display = 'inline';
             document.getElementById('fetchLibraryButton').style.display = 'inline';
             document.getElementById('fetchPlaylistsButton').style.display = 'inline';
             document.getElementById('normalModeButton').style.display = 'none';
@@ -80,6 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('challengeModeButton').addEventListener('click', () => {
             gamemode = 1;
             console.log('Game mode: ', gamemode);
+            document.getElementById('difficultyHeader').style.display = 'none';
+            document.getElementById('collectionHeader').style.display = 'inline';
             document.getElementById('fetchLibraryButton').style.display = 'inline';
             document.getElementById('fetchPlaylistsButton').style.display = 'inline';
             document.getElementById('normalModeButton').style.display = 'none';
@@ -118,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('backButton').addEventListener('click', () => {
+            document.getElementById('difficultyHeader').style.display = 'inline';
+            document.getElementById('collectionHeader').style.display = 'none';
             document.getElementById('fetchLibraryButton').style.display = 'none';
             document.getElementById('fetchPlaylistsButton').style.display = 'none';
             document.getElementById('normalModeButton').style.display = 'inline';
@@ -149,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('giveUpButton').addEventListener('click', () => {
-            document.getElementById('songList').textContent = 'That song was: ' + `${currentSong.attributes.name}`
+            document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
                 + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
             songsWrong.push(" " + currentSong.attributes.name);
             songCount++;
@@ -229,6 +237,8 @@ function reset() {
     document.getElementById('songsWrong').textContent = '';
 
     // Ensure necessary buttons and inputs are hidden/shown
+    document.getElementById('difficultyHeader').style.display = 'inline';
+    document.getElementById('collectionHeader').style.display = 'none';
     document.getElementById('searchInput').style.display = 'none';
     document.getElementById('backButton').style.display = 'none';
     document.getElementById('authorizeButton').style.display = 'inline';
@@ -602,6 +612,7 @@ function filterSongs(searchTerm) {
  */
 function songComparator(songId) {
     if (songId === currentSongId) {
+        document.getElementById('guessInput').value = "";
         console.log('Guessed correctly');
         songCount++;
         correctCount++;     // TODO: MAKE SURE TO SHOW STATS ON THIS IN NORMAL MODE! MIGHT NOT BE 3/3 in the first second for example. Maybe first 3 seconds?
@@ -615,8 +626,8 @@ function songComparator(songId) {
             incorrectCount++;
             guess = false;
             music.stop();
-            songsWrong.push(" " + currentSong.attributes.name);
-            document.getElementById('songList').textContent = 'Incorrect, try again.';
+            songsWrong.push(" " + currentSong.attributes.name + "\n");
+            document.getElementById('msg').textContent = 'Incorrect, try again.';
             if (playWithLibrary) {
                 play(librarySongs);
             } else {
@@ -639,7 +650,7 @@ function songComparator(songId) {
  * @param song
  */
 function showSongInfo(guess, song) {
-    const songInfo = document.getElementById('songList');
+    const songInfo = document.getElementById('msg');
     const music = MusicKit.getInstance();
     songInfo.innerHTML = '';
 
@@ -662,7 +673,7 @@ function showSongInfo(guess, song) {
         songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
         music.stop();
         updateStats();
-        songsWrong.push(" " + song.attributes.name);
+        songsWrong.push(" " + song.attributes.name + "\n");
         console.log(songCount);
         console.log(playlistSize);
         if (playlistSize === songCount) {

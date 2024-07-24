@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!--     <span style="font-size: 0.5em; color: green;">v.Alpha</span>-->
     <title>OneSecond</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
@@ -26,7 +25,9 @@
                 <div class="box-container">
                     <div class="box large-box game-description">
                         <h2 class="title is-3 has-text-link">Welcome to OneSecond!</h2>
-                        <p class="mb-4">Connect your Apple Music account and test your music knowledge. We'll play a random 1-second snippet from your library or playlists, and your task is to guess the song! Are you ready to challenge your music recognition skills?</p>
+                        <p class="mb-4">Connect your Apple Music account and test your music knowledge.
+                            We'll play a random 1-second snippet from your library or playlists, and your task is to guess the song!
+                            Are you ready to challenge your music recognition skills?</p>
                         <div class="buttons-centered">
                             <button id="authorizeButton" class="button is-primary">Log In</button>
                             <button id="unauthorizeButton" class="button is-danger">Log Out</button>
@@ -35,9 +36,10 @@
                 </div>
                 <div class="box-container">
                     <div class="box large-box">
-                        <p class="mb-4">Select a Difficulty:</p>
-                        <button id="normalModeButton" class="button is-link is-fullwidth">Normal</button>
-                        <button id="challengeModeButton" class="button is-link is-fullwidth">Challenge</button>
+                        <p id="difficultyHeader" class="subtitle has-text-link">Select a Difficulty:<br><br></p>
+                        <p id="collectionHeader" class="subtitle has-text-link">Select a Collection to Play From:<br><br></p>
+                        <button id="normalModeButton" class="button is-link is-fullwidth">Normal --- 10 second maximum, unlimited guesses</button>
+                        <button id="challengeModeButton" class="button is-link is-fullwidth">Challenge --- 3 second maximum, one guess</button>
                         <button id="fetchLibraryButton" class="button is-link is-fullwidth">Play With Your Library</button>
                         <button id="fetchPlaylistsButton" class="button is-link is-fullwidth">Play With a Playlist</button>
                         <button id="backButton" class="button is-link">Back</button>
@@ -82,6 +84,7 @@
                         </div>
                         <div class="stats-container">
                             <div id="stats">Score: </div>
+                            <div id="msg"></div>
                         </div>
                     </div>
                 </div>
