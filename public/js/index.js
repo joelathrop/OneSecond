@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('collectionHeader').style.display = 'none';
     document.getElementById('fetchLibraryButton').style.display = 'none';
     document.getElementById('fetchPlaylistsButton').style.display = 'none';
-    document.getElementById('normalModeButton').style.display = 'inline';
-    document.getElementById('challengeModeButton').style.display = 'inline';
+    document.getElementById('normalModeButton').style.display = 'none';
+    document.getElementById('challengeModeButton').style.display = 'none';
     document.getElementById('backButton').style.display = 'none';
     document.getElementById('loadingMsg').style.display = 'none';
 
@@ -78,7 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fetchPlaylistsButton').style.display = 'inline';
             document.getElementById('normalModeButton').style.display = 'none';
             document.getElementById('challengeModeButton').style.display = 'none';
-            document.getElementById('backButton').style.display = 'inline';
+            document.getElementById('backButton').style.postion = 'relative';
+            document.getElementById('backButton').style.display = 'block';
+            document.getElementById('backButton').style.margin = 'auto';
         });
 
         document.getElementById('challengeModeButton').addEventListener('click', () => {

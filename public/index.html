@@ -10,6 +10,23 @@
         .page { display: none; }
         .active { display: block; }
         .box-container { margin-bottom: 20px; }
+        .dialogue {
+            display: none;
+            position: absolute;
+            bottom: 300px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            border-radius: 10px;
+        }
+        .button-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
     </style>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,17 +52,24 @@
                     </div>
                 </div>
                 <div class="box-container">
-                    <div class="box large-box">
-                        <p id="difficultyHeader" class="subtitle has-text-link">Select a Difficulty:<br><br></p>
-                        <p id="collectionHeader" class="subtitle has-text-link">Select a Collection to Play From:<br><br></p>
-                        <button id="normalModeButton" class="button is-link is-fullwidth">Normal --- 10 second maximum, unlimited guesses</button>
-                        <button id="challengeModeButton" class="button is-link is-fullwidth">Challenge --- 3 second maximum, one guess</button>
+                    <div class="box large-box has-text-centered">
+                        <p id="difficultyHeader" class="subtitle has-text-weight-bold has-text-centered has-text-link">Select a Difficulty<br><br></p>
+                        <p id="collectionHeader" class="subtitle has-text-weight-bold has-text-centered has-text-link">Select a Collection to Play From<br><br></p>
+                        
+                            <button class="button is-link is-medium is-fullwidth" id="normalModeButton">Normal</button>
+                            <!-- <div class="dialogue" id="normalDialogue">10 second maximum, unlimited guesses</div> -->
+                                              
+                        
+                            <button class="button is-link is-medium is-fullwidth" id="challengeModeButton">Challenge</button>
+                            <!-- <div class="dialogue" id="challengeDialogue">3 second maximum, one guess</div> -->
+                                              
                         <button id="fetchLibraryButton" class="button is-link is-fullwidth">Play With Your Library</button>
                         <button id="fetchPlaylistsButton" class="button is-link is-fullwidth">Play With a Playlist</button>
-                        <button id="backButton" class="button is-link">Back</button>
+                        <!-- <button id="backButton" class="button is-link">Back</button> -->
                     </div>
                 </div>
             </div>
+            <button id="backButton" class="button is-link">Back</button>
 
             <div id="page2" class="page">
                 <div class="box-container">
@@ -98,5 +122,6 @@
     </section>
 
     <script src="/js/index.js"></script>
+    <script src="js/style.js"></script>
 </body>
 </html>
