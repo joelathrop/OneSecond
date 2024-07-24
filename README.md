@@ -5,7 +5,8 @@
 
 ## Overview
 A game to guess your Apple Music library one second at a time. Pick from your
-entire library or just a playlist.
+entire library or just a playlist. The brainchild of Joe Lathrop brought to you with 
+the creative vision of Dominic Spinnato.
 
 ## About the Game
 This game was inspired by Heardle, a now discontinued game in which you try to guess
