@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('backButton').style.display = 'none';
         });
 
-        // add a second
         document.getElementById('addTime').addEventListener('click', () => {
             if (gamemode === 1) {
                 if (!addTimeUsage) {
