@@ -20,6 +20,7 @@ let allPlaylists = [];
 let songsWrong = [];
 
 let playing = false;
+let playButtonPressed = false;
 let playWithLibrary = false;
 let firstTime = false;
 let guess = false;
@@ -158,23 +159,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('giveUpButton').addEventListener('click', () => {
-            document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
-                + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
-            songsWrong.push(" " + currentSong.attributes.name);
-            songCount++;
-            playTime = 1000;
-            music.stop();
-            if (playlistSize === songCount) {
-                endgame();
-            } else {
-                if (playWithLibrary) {
-                    play(librarySongs);
+            if (playButtonPressed) {
+                document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
+                    + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
+                songsWrong.push(" " + currentSong.attributes.name);
+                playTime = 1000;
+                music.stop();
+                songCount++;
+                playButtonPressed = false;
+                if (playlistSize === songCount) {
+                    endgame();
                 } else {
-                    play(selectedPlaylistTracks);
+                    if (playWithLibrary) {
+                        play(librarySongs);
+                    } else {
+                        play(selectedPlaylistTracks);
+                    }
                 }
+            } else {
+                console.error('game is not being played');
             }
-
-            // what else to update??
         });
 
         document.getElementById('unauthorizeButton').addEventListener('click', () => {
@@ -225,6 +229,7 @@ function reset() {
     selectedPlaylistId = null;
     selectedPlaylist = null;
     playing = false;
+    playButtonPressed = false;
     playWithLibrary = false;
     firstTime = false;
     guess = false;
@@ -441,8 +446,6 @@ function displayItems(items) {
     const itemList = document.getElementById('itemList');
     itemList.innerHTML = '';
 
-    // console.log(allPlaylists.toString());
-
     items.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item.attributes.name;
@@ -460,7 +463,6 @@ function displayItems(items) {
             }
         });
         itemList.appendChild(li);
-        // itemList.append(li);
     });
 }
 
@@ -535,6 +537,7 @@ function play(songs) {
     console.log(songs);
 
     document.getElementById('playButton').addEventListener('click', () => {
+        playButtonPressed = true;
 
         currentSong = songs[songCount];
         currentSongId = songs[songCount].id;
@@ -656,6 +659,7 @@ function showSongInfo(guess, song) {
     songInfo.innerHTML = '';
 
     if (guess) {
+        playButtonPressed = false;
         songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
         updateStats();
         console.log(songCount);
@@ -693,6 +697,7 @@ function showSongInfo(guess, song) {
  * Function to finish the game
  */
 function endgame() {
+    playing = false;
     const stats = document.getElementById('statsList');
     stats.innerHTML = '';
     document.getElementById('songsWrong').style.display = 'inline';
