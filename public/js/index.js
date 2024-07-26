@@ -241,6 +241,7 @@ function reset() {
     document.getElementById('itemList').textContent = '';
     document.getElementById('statsList').textContent = '';
     document.getElementById('songsWrong').textContent = '';
+    document.getElementById('msg').textContent = '';
 
     // Ensure necessary buttons and inputs are hidden/shown
     document.getElementById('difficultyHeader').style.display = 'inline';
@@ -265,7 +266,8 @@ function reset() {
  * Dynamically updates the score while the game is in progress
  */
 function updateStats() {
-    document.getElementById('stats').textContent = `Score: ${correctCount} / ${selectedPlaylistTracks.length}`
+    document.getElementById('stats').textContent = `Score: ${correctCount} / ${incorrectCount + correctCount}` +
+        "   ||   Songs in the collection: " + `${selectedPlaylistTracks.length}`;
 }
 
 /**
@@ -507,6 +509,7 @@ function play(songs) {
     document.getElementById('giveUpButton').style.display = 'none';
 
     displayItems([]);
+    updateStats();
 
     document.getElementById('guessInput').style.display = 'inline';
     document.getElementById('guessInput').addEventListener('input', () => {
