@@ -630,7 +630,7 @@ function songComparator(songId) {
             incorrectCount++;
             guess = false;
             music.stop();
-            songsWrong.push(" " + currentSong.attributes.name + "\n");
+            songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('msg').textContent = 'Incorrect, try again.';
             if (playWithLibrary) {
                 play(librarySongs);
@@ -678,7 +678,7 @@ function showSongInfo(guess, song) {
         songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
         music.stop();
         updateStats();
-        songsWrong.push(" " + song.attributes.name + "\n");
+        songsWrong.push(" " + song.attributes.name);
         console.log(songCount);
         console.log(playlistSize);
         if (playlistSize === songCount) {
