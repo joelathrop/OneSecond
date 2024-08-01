@@ -18,6 +18,7 @@ let librarySongs = [];
 let selectedPlaylistTracks = [];
 let allPlaylists = [];
 let songsWrong = [];
+let listenLaterList = [];
 
 let playing = false;
 let playButtonPressed = false;
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('challengeModeButton').style.display = 'none';
     document.getElementById('backButton').style.display = 'none';
     document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('listenLaterButton').style.display = 'none';
 
     setTimeout(() => {
         music = MusicKit.getInstance();
@@ -177,8 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        document.getElementById('listenLaterButton').addEventListener('click', () => {
+            listenLaterList.push(currentSong);
+        });
+
         document.getElementById('giveUpButton').addEventListener('click', () => {
             if (playButtonPressed) {
+                document.getElementById('listenLaterButton').style.display = 'inline';
                 document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
                     + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
                 songsWrong.push(" " + currentSong.attributes.name);
@@ -220,8 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
  * search bars, and the game statistics
  */
 function reset() {
-
-    // TODO: Error here before game is over?
     if (playing && (songCount < selectedPlaylistTracks.length)) {
         const music = MusicKit.getInstance();
         music.stop();
@@ -231,6 +236,8 @@ function reset() {
             console.error('Failed to reset the playback queue:', error);
         });
     }
+
+    // TODO: WHERE TO RESET LISTEN LATER LIST?
 
     songCount = 0;
     prevSongCount = 0;
@@ -561,6 +568,7 @@ function play(songs) {
 
     document.getElementById('playButton').addEventListener('click', () => {
         playButtonPressed = true;
+        document.getElementById('listenLaterButton').style.display = 'none';
 
         currentSong = songs[songCount];
         currentSongId = songs[songCount].id;
@@ -677,6 +685,7 @@ function songComparator(songId) {
  * @param song
  */
 function showSongInfo(guess, song) {
+    document.getElementById('listenLaterButton').style.display = 'inline';
     const songInfo = document.getElementById('msg');
     const music = MusicKit.getInstance();
     songInfo.innerHTML = '';
