@@ -109,6 +109,25 @@ document.addEventListener('DOMContentLoaded', () => {
             router();
         });
 
+        document.getElementById('randomPlaylistButton').addEventListener('click', () => {
+            let r = -1;
+            if (!allPlaylists.isEmpty) {
+                r = Math.floor(Math.random() * (allPlaylists.length));
+                console.log(r);
+
+                // play with random number
+                selectedPlaylist = allPlaylists[r];
+                selectedPlaylistId = allPlaylists[r].id;
+                console.log(selectedPlaylistId);
+                showGame();
+
+                // TODO: will this cause problems
+                // itemList.innerHTML = '';
+            } else {
+                console.log('No playlists found!');
+            }
+        });
+
         document.getElementById('searchInput').addEventListener('input', () => {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             filterPlaylists(searchTerm);
@@ -166,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 playTime = 1000;
                 music.stop();
                 songCount++;
+                incorrectCount++;
                 playButtonPressed = false;
                 if (playlistSize === songCount) {
                     endgame();
@@ -533,9 +553,9 @@ function play(songs) {
     // show addTime button/label & give up button
     document.getElementById('timeLabel').style.display = 'inline';
     document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
-    if (gamemode === 0) {
+    // if (gamemode === 0) {
         document.getElementById('giveUpButton').style.display = 'inline';
-    }
+    // }
 
     console.log(songs);
 
@@ -730,7 +750,6 @@ function showPage(pageId) {
     console.log(`Showing page: ${pageId}`);
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
-    // console.log(document.getElementById('page3').classList);
 }
 
 function showHome() {
