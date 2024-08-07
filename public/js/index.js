@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('authorizeButton').addEventListener('click', () => {
             music.authorize().then((musicUserToken) => {
-                console.log(`Authorized, music user token: ${musicUserToken}`);
                 document.getElementById('normalModeButton').style.display = 'inline';
                 document.getElementById('challengeModeButton').style.display = 'inline';
                 document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
@@ -251,6 +250,7 @@ function reset() {
     allPlaylists = [];
     songsWrong = [];
     selectedPlaylistTracks = [];
+    listenLaterList = [];
     currentSongId = null;
     currentSong = null;
     selectedPlaylistId = null;
