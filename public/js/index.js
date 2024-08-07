@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('backButton').style.postion = 'relative';
             document.getElementById('backButton').style.display = 'block';
             document.getElementById('backButton').style.margin = 'auto';
+            window.location.href = '/selectMode'
         });
 
         document.getElementById('challengeModeButton').addEventListener('click', () => {
@@ -101,10 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('backButton').style.display = 'none';
             playWithLibrary = true;
             window.history.pushState({}, '', '/library/play');
+            window.location.href = '/game'
             router();
         });
 
         document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
+            window.location.href = '/selectLocation'
             document.getElementById('backButton').style.display = 'none';
             window.history.pushState({}, '', '/playlists');
             router();
@@ -779,3 +782,31 @@ function showGame() {
         fetchPlaylistSongs(selectedPlaylistId);
     }
 }
+
+
+
+// document.getElementById('authorizeButton').addEventListener('click', () => {
+//     music.authorize().then((musicUserToken) => {
+//         console.log(`Authorized, music user token: ${musicUserToken}`);
+//         window.location.href = '/select-library';
+//     }).catch((error) => {
+//         console.error('Authorization error:', error);
+//     });
+// });
+
+// document.getElementById('fetchLibraryButton').addEventListener('click', () => {
+//     playWithLibrary = true;
+//     window.location.href = '/game';
+// });
+
+// document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
+//     window.location.href = '/game';
+// });
+
+document.getElementById('homeButton2').addEventListener('click', () => {
+    window.location.href = '/';
+});
+
+document.getElementById('homeButton3').addEventListener('click', () => {
+    window.location.href = '/';
+});

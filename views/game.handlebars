@@ -1,0 +1,36 @@
+
+    <header class="header">
+        <h1 class="header-title title is-2">
+            OneSecond <span class="version">v.Alpha</span>
+        </h1>
+    </header>
+    <section class="section">
+        <div class="container">
+            <div class="box-container">
+                <div class="box large-box">
+                    <h2 class="subtitle has-text-link">Guess the song</h2>
+                    <button id="playButton" class="button is-success is-fullwidth">Play</button>
+                    <div class="field">
+                        <div class="control">
+                            <input type="text" id="guessInput" class="input" placeholder="Guess the song...">
+                            <p id="loadingMsg" class="is-link">Loading your library, please wait...</p>
+                        </div>
+                    </div>
+                    <div class="add-time-button-container">
+                        <button id="addTime" class="button is-link">Add a second</button>
+                        <p id="timeLabel" class="mt-4"></p>
+                        <button id="giveUpButton" class="button is-link">Give up</button>
+                    </div>
+                    <div class="home-button-container">
+                        <button id="homeButton3" class="button is-link">Home</button>
+                    </div>
+                    <div class="stats-container">
+                        <div id="stats">Score: </div>
+                        <div id="msg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="/js/index.js"></script>
+    <script src="/js/style.js"></script>

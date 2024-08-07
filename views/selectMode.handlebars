@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneSecond - Select Mode</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"></script>
+</head>
+<style>
+        .page { display: none; }
+        .active { display: block; }
+        .box-container { margin-bottom: 20px; }
+        .dialogue {
+            display: none;
+            position: absolute;
+            bottom: 300px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            border-radius: 10px;
+        }
+        .button-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
+
+<body>
+    <header class="header">
+        <h1 class="header-title title is-2">
+            OneSecond <span class="version">v.Alpha</span>
+        </h1>
+    </header>
+    <section class="section">
+        <div class="container">
+            <div class="box-container">
+                <div class="box large-box has-text-centered">
+                    <h2 class="title is-3 has-text-link">Choose Your Collection</h2>
+                    <p id="collectionHeader" class="subtitle has-text-weight-bold has-text-centered has-text-link">
+                        Select a Collection to Play From
+                    </p>
+                    <button id="fetchLibraryButton" class="button is-link is-medium is-fullwidth">
+                        Play With Your Library
+                    </button>
+                    <button id="fetchPlaylistsButton" class="button is-link is-medium is-fullwidth">
+                        Play With a Playlist
+                    </button>
+                    <div class="home-button-container">
+                        <button id="backButton" class="button is-link">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="/js/index.js"></script>
+    <script src="/js/style.js"></script>
+</body>
+</html>
