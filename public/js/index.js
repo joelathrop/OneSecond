@@ -6,7 +6,7 @@ let prevSongCount = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let playlistSize = 0;
-let gamemode = -1;  // 0: NORMAL // 1: CHALLENGE
+let gamemode;  // 0: NORMAL // 1: CHALLENGE
 let playTime = 1000;
 let offset = 100;
 
@@ -23,7 +23,7 @@ let allPlaylists = [];
 let songsWrong = [];
 let listenLaterList = [];
 
-/* BOOLEANS */
+/* BOOLEANS || 1 is true, 0 is false */
 let playing = false;
 let playButtonPressed = false;
 let playWithLibrary = false;
@@ -54,17 +54,23 @@ const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRV
 // TODO: Saving/loading states?
 
 document.addEventListener('DOMContentLoaded', () => {
+    // if (!music) {
+        MusicKit.configure({
+            developerToken: developerToken,
+            app: {
+                name: 'MusicKit Example',
+                build: '1978.4.1'
+            }
+        });
+    // }
 
-    MusicKit.configure({
-        developerToken: developerToken,
-        app: {
-            name: 'MusicKit Example',
-            build: '1978.4.1'
-        }
-    });
+    /* Get all necessary values if page has reloaded */
+    gamemode = getFromStorage('gamemode');
+    // music = getFromStorage('music');
 
-    console.log(gamemode);
+    console.log(music);
 
+    /* Get all button and field IDs */
     authorizeButton = document.getElementById('authorizeButton');
     normalModeButton = document.getElementById('normalModeButton');
     challengeModeButton = document.getElementById('challengeModeButton');
@@ -80,19 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
     giveUpButton = document.getElementById('giveUpButton');
     unauthorizeButton = document.getElementById('unauthorizeButton');
 
-    // show/hide necessary buttons/headers
-    // document.getElementById('difficultyHeader').style.display = 'inline';
-    // document.getElementById('collectionHeader').style.display = 'none';
-    // document.getElementById('fetchLibraryButton').style.display = 'none';
-    // document.getElementById('fetchPlaylistsButton').style.display = 'none';
-    // document.getElementById('normalModeButton').style.display = 'none';
-    // document.getElementById('challengeModeButton').style.display = 'none';
-    // document.getElementById('backButton').style.display = 'none';
-    // document.getElementById('loadingMsg').style.display = 'none';
-    // document.getElementById('listenLaterButton').style.display = 'none';
+    /* Which page am I on? */
+    const currentPath = window.location.pathname;
 
     setTimeout(() => {
         music = MusicKit.getInstance();
+        console.log(music);
+        // setInStorage('music', music);
 
         if (!music) {
             console.error('Failed to initialize MusicKit instance.');
@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             normalModeButton.addEventListener('click', () => {
                 gamemode = 0;
                 console.log('Game mode: ', gamemode);
+                setInStorage('gamemode', gamemode);
                 // document.getElementById('difficultyHeader').style.display = 'none';
                 // document.getElementById('collectionHeader').style.display = 'inline';
                 // document.getElementById('fetchLibraryButton').style.display = 'inline';
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             challengeModeButton.addEventListener('click', () => {
                 gamemode = 1;
                 console.log('Game mode: ', gamemode);
+                setInStorage('gamemode', gamemode);
                 // document.getElementById('difficultyHeader').style.display = 'none';
                 // document.getElementById('collectionHeader').style.display = 'inline';
                 // document.getElementById('fetchLibraryButton').style.display = 'inline';
@@ -155,10 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (fetchPlaylistsButton) {
             fetchPlaylistsButton.addEventListener('click', () => {
-                window.location.href = '/selectLocation'
-                document.getElementById('backButton').style.display = 'none';
-                window.history.pushState({}, '', '/playlists');
-                router();
+                window.location.href = '/selectLocation';
+                fetchUserPlaylists(music);
+                // document.getElementById('backButton').style.display = 'none';
+                // window.history.pushState({}, '', '/playlists');
+                // router();
             });
         }
 
@@ -279,9 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
             unauthorizeButton.addEventListener('click', () => {
                 music.unauthorize();
                 console.log('User has been unauthorized.');
-                document.getElementById('fetchLibraryButton').style.display = 'none';
-                document.getElementById('fetchPlaylistsButton').style.display = 'none';
-                document.getElementById('unauthorizeButton').style.display = 'none';
+                // document.getElementById('fetchLibraryButton').style.display = 'none';
+                // document.getElementById('fetchPlaylistsButton').style.display = 'none';
+                // document.getElementById('unauthorizeButton').style.display = 'none';
             });
         }
 
@@ -358,6 +361,25 @@ function reset() {
     updateStats();
 }
 
+/**
+ * Maps an item to a value in session storage
+ *
+ * @param name - reference for the value
+ * @param value - value to set in storage
+ */
+function setInStorage(name, value) {
+    sessionStorage.setItem(name.toString(), value);
+}
+
+/**
+ * Returns an item from session storage based on passed value
+ *
+ * @param name - name of item to return
+ * @returns {string}
+ */
+function getFromStorage(name) {
+    return sessionStorage.getItem(name.toString());
+}
 
 /**
  * Dynamically updates the score while the game is in progress
@@ -542,7 +564,8 @@ function fetchPlaylistSongsPage(url) {
  * @param items
  */
 function displayItems(items) {
-    const itemList = document.getElementById('itemList');
+    // const itemList = document.getElementById('itemList');
+    const itemList = document.createElement('itemList');
     itemList.innerHTML = '';
 
     items.forEach(item => {
