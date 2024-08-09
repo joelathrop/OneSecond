@@ -1,5 +1,6 @@
 let music;
 
+/* NUMBERS */
 let songCount = 0;
 let prevSongCount = 0;
 let correctCount = 0;
@@ -9,23 +10,42 @@ let gamemode = -1;  // 0: NORMAL // 1: CHALLENGE
 let playTime = 1000;
 let offset = 100;
 
+/* IDs */
 let currentSongId = null;
 let currentSong = null;
 let selectedPlaylistId = null;
 let selectedPlaylist = null;
 
+/* ARRAYS */
 let librarySongs = [];
 let selectedPlaylistTracks = [];
 let allPlaylists = [];
 let songsWrong = [];
 let listenLaterList = [];
 
+/* BOOLEANS */
 let playing = false;
 let playButtonPressed = false;
 let playWithLibrary = false;
 let firstTime = false;
 let guess = false;
 let addTimeUsage = false;
+
+/* DOCUMENT RESOURCES */
+let authorizeButton;
+let normalModeButton;
+let challengeModeButton;
+let fetchLibraryButton;
+let fetchPlaylistsButton;
+let randomPlaylistButton;
+let searchInput;
+let homeButton2;
+let homeButton3;
+let backButton;
+let addTimeButton;
+let listenLaterButton;
+let giveUpButton;
+let unauthorizeButton;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
 const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
@@ -34,6 +54,7 @@ const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRV
 // TODO: Saving/loading states?
 
 document.addEventListener('DOMContentLoaded', () => {
+
     MusicKit.configure({
         developerToken: developerToken,
         app: {
@@ -41,6 +62,23 @@ document.addEventListener('DOMContentLoaded', () => {
             build: '1978.4.1'
         }
     });
+
+    console.log(gamemode);
+
+    authorizeButton = document.getElementById('authorizeButton');
+    normalModeButton = document.getElementById('normalModeButton');
+    challengeModeButton = document.getElementById('challengeModeButton');
+    fetchLibraryButton = document.getElementById('fetchLibraryButton');
+    fetchPlaylistsButton = document.getElementById('fetchPlaylistsButton');
+    randomPlaylistButton = document.getElementById('randomPlaylistButton');
+    searchInput = document.getElementById('searchInput');
+    homeButton2 = document.getElementById('homeButton2');
+    homeButton3 = document.getElementById('homeButton3');
+    backButton = document.getElementById('backButton');
+    addTimeButton = document.getElementById('addTime');
+    listenLaterButton = document.getElementById('listenLaterButton');
+    giveUpButton = document.getElementById('giveUpButton');
+    unauthorizeButton = document.getElementById('unauthorizeButton');
 
     // show/hide necessary buttons/headers
     // document.getElementById('difficultyHeader').style.display = 'inline';
@@ -61,167 +99,195 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        document.getElementById('authorizeButton').addEventListener('click', () => {
-            music.authorize().then((musicUserToken) => {
+        if (authorizeButton) {
+            authorizeButton.addEventListener('click', () => {
+                music.authorize().then((musicUserToken) => {
+                    document.getElementById('normalModeButton').style.display = 'inline';
+                    document.getElementById('challengeModeButton').style.display = 'inline';
+                    document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
+                }).catch((error) => {
+                    console.error('Authorization error:', error);
+                });
+            });
+        }
+
+        if (normalModeButton) {
+            normalModeButton.addEventListener('click', () => {
+                gamemode = 0;
+                console.log('Game mode: ', gamemode);
+                // document.getElementById('difficultyHeader').style.display = 'none';
+                // document.getElementById('collectionHeader').style.display = 'inline';
+                // document.getElementById('fetchLibraryButton').style.display = 'inline';
+                // document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+                // document.getElementById('normalModeButton').style.display = 'none';
+                // document.getElementById('challengeModeButton').style.display = 'none';
+                // document.getElementById('backButton').style.postion = 'relative';
+                // document.getElementById('backButton').style.display = 'block';
+                // document.getElementById('backButton').style.margin = 'auto';
+                window.location.href = '/selectMode';
+            });
+        }
+
+        if (challengeModeButton) {
+            challengeModeButton.addEventListener('click', () => {
+                gamemode = 1;
+                console.log('Game mode: ', gamemode);
+                // document.getElementById('difficultyHeader').style.display = 'none';
+                // document.getElementById('collectionHeader').style.display = 'inline';
+                // document.getElementById('fetchLibraryButton').style.display = 'inline';
+                // document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+                // document.getElementById('normalModeButton').style.display = 'none';
+                // document.getElementById('challengeModeButton').style.display = 'none';
+                // document.getElementById('backButton').style.display = 'inline';
+                window.location.href = '/selectMode';
+            });
+        }
+
+        if (fetchLibraryButton) {
+            fetchLibraryButton.addEventListener('click', () => {
+                document.getElementById('backButton').style.display = 'none';
+                playWithLibrary = true;
+                window.history.pushState({}, '', '/library/play');
+                window.location.href = '/game'
+                router();
+            });
+        }
+
+        if (fetchPlaylistsButton) {
+            fetchPlaylistsButton.addEventListener('click', () => {
+                window.location.href = '/selectLocation'
+                document.getElementById('backButton').style.display = 'none';
+                window.history.pushState({}, '', '/playlists');
+                router();
+            });
+        }
+
+        if (randomPlaylistButton) {
+            randomPlaylistButton.addEventListener('click', () => {
+                let r = -1;
+                if (!allPlaylists.isEmpty) {
+                    r = Math.floor(Math.random() * (allPlaylists.length));
+                    console.log(r);
+
+                    // play with random number
+                    selectedPlaylist = allPlaylists[r];
+                    selectedPlaylistId = allPlaylists[r].id;
+                    console.log(selectedPlaylistId);
+                    showGame();
+
+                    // TODO: will this cause problems
+                    // itemList.innerHTML = '';
+                } else {
+                    console.log('No playlists found!');
+                }
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                filterPlaylists(searchTerm);
+            });
+        }
+
+        if (homeButton2) {
+            homeButton2.addEventListener('click', () => {
+                reset();
+                window.history.pushState({}, '', '/');
+                router();
+            });
+        }
+
+        if (homeButton3) {
+            homeButton3.addEventListener('click', () => {
+                reset();
+                window.history.pushState({}, '', '/');
+                router();
+            });
+        }
+
+        if (backButton) {
+            backButton.addEventListener('click', () => {
+                document.getElementById('difficultyHeader').style.display = 'inline';
+                document.getElementById('collectionHeader').style.display = 'none';
+                document.getElementById('fetchLibraryButton').style.display = 'none';
+                document.getElementById('fetchPlaylistsButton').style.display = 'none';
                 document.getElementById('normalModeButton').style.display = 'inline';
                 document.getElementById('challengeModeButton').style.display = 'inline';
-                document.getElementById('unauthorizeButton').style.display = 'inline'; // Show unauthorize button
-            }).catch((error) => {
-                console.error('Authorization error:', error);
+
+                document.getElementById('backButton').style.display = 'none';
             });
-        });
+        }
 
-        document.getElementById('normalModeButton').addEventListener('click', () => {
-            gamemode = 0;
-            console.log('Game mode: ', gamemode);
-            document.getElementById('difficultyHeader').style.display = 'none';
-            // document.getElementById('collectionHeader').style.display = 'inline';
-            // document.getElementById('fetchLibraryButton').style.display = 'inline';
-            // document.getElementById('fetchPlaylistsButton').style.display = 'inline';
-            // document.getElementById('normalModeButton').style.display = 'none';
-            // document.getElementById('challengeModeButton').style.display = 'none';
-            // document.getElementById('backButton').style.postion = 'relative';
-            // document.getElementById('backButton').style.display = 'block';
-            // document.getElementById('backButton').style.margin = 'auto';
-            window.location.href = '/selectMode'
-            console.log('hello')
-        });
-
-        document.getElementById('challengeModeButton').addEventListener('click', () => {
-            gamemode = 1;
-            console.log('Game mode: ', gamemode);
-            document.getElementById('difficultyHeader').style.display = 'none';
-            document.getElementById('collectionHeader').style.display = 'inline';
-            document.getElementById('fetchLibraryButton').style.display = 'inline';
-            document.getElementById('fetchPlaylistsButton').style.display = 'inline';
-            document.getElementById('normalModeButton').style.display = 'none';
-            document.getElementById('challengeModeButton').style.display = 'none';
-            document.getElementById('backButton').style.display = 'inline';
-        });
-
-        document.getElementById('fetchLibraryButton').addEventListener('click', () => {
-            document.getElementById('backButton').style.display = 'none';
-            playWithLibrary = true;
-            window.history.pushState({}, '', '/library/play');
-            window.location.href = '/game'
-            router();
-        });
-
-        document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
-            window.location.href = '/selectLocation'
-            document.getElementById('backButton').style.display = 'none';
-            window.history.pushState({}, '', '/playlists');
-            router();
-        });
-
-        document.getElementById('randomPlaylistButton').addEventListener('click', () => {
-            let r = -1;
-            if (!allPlaylists.isEmpty) {
-                r = Math.floor(Math.random() * (allPlaylists.length));
-                console.log(r);
-
-                // play with random number
-                selectedPlaylist = allPlaylists[r];
-                selectedPlaylistId = allPlaylists[r].id;
-                console.log(selectedPlaylistId);
-                showGame();
-
-                // TODO: will this cause problems
-                // itemList.innerHTML = '';
-            } else {
-                console.log('No playlists found!');
-            }
-        });
-
-        document.getElementById('searchInput').addEventListener('input', () => {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            filterPlaylists(searchTerm);
-        });
-
-        document.getElementById('homeButton2').addEventListener('click', () => {
-            reset();
-            window.history.pushState({}, '', '/');
-            router();
-        });
-
-        document.getElementById('homeButton3').addEventListener('click', () => {
-            reset();
-            window.history.pushState({}, '', '/');
-            router();
-        });
-
-        document.getElementById('backButton').addEventListener('click', () => {
-            document.getElementById('difficultyHeader').style.display = 'inline';
-            document.getElementById('collectionHeader').style.display = 'none';
-            document.getElementById('fetchLibraryButton').style.display = 'none';
-            document.getElementById('fetchPlaylistsButton').style.display = 'none';
-            document.getElementById('normalModeButton').style.display = 'inline';
-            document.getElementById('challengeModeButton').style.display = 'inline';
-
-            document.getElementById('backButton').style.display = 'none';
-        });
-
-        document.getElementById('addTime').addEventListener('click', () => {
-            if (gamemode === 1) {
-                if (!addTimeUsage) {
-                    playTime += 2000;
-                    addTimeUsage = true;
-                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
-                } else {
-                    // TODO : BULMA BUTTON SHAKE
-                    alert("You can't add any more time!");
-                }
-            } else if (gamemode === 0) {
-                if (playTime < 10000) {
-                    playTime += 1000;
-                    console.log('Play time:' + playTime);
-                    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
-                } else {
-                    alert("You can't add any more time!");
-                }
-            }
-        });
-
-        document.getElementById('listenLaterButton').addEventListener('click', () => {
-            listenLaterList.push(currentSong);
-        });
-
-        document.getElementById('giveUpButton').addEventListener('click', () => {
-            if (playButtonPressed) {
-                document.getElementById('listenLaterButton').style.display = 'inline';
-                document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
-                    + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
-                songsWrong.push(" " + currentSong.attributes.name);
-                playTime = 1000;
-                music.stop();
-                songCount++;
-                incorrectCount++;
-                playButtonPressed = false;
-                if (playlistSize === songCount) {
-                    endgame();
-                } else {
-                    if (playWithLibrary) {
-                        play(librarySongs);
+        if (addTimeButton) {
+            addTimeButton.addEventListener('click', () => {
+                if (gamemode === 1) {
+                    if (!addTimeUsage) {
+                        playTime += 2000;
+                        addTimeUsage = true;
+                        document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
                     } else {
-                        play(selectedPlaylistTracks);
+                        // TODO : BULMA BUTTON SHAKE
+                        alert("You can't add any more time!");
+                    }
+                } else if (gamemode === 0) {
+                    if (playTime < 10000) {
+                        playTime += 1000;
+                        console.log('Play time:' + playTime);
+                        document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+                    } else {
+                        alert("You can't add any more time!");
                     }
                 }
-            } else {
-                console.error('game is not being played');
-            }
-        });
+            });
+        }
 
-        document.getElementById('unauthorizeButton').addEventListener('click', () => {
-            music.unauthorize();
-            console.log('User has been unauthorized.');
-            document.getElementById('fetchLibraryButton').style.display = 'none';
-            document.getElementById('fetchPlaylistsButton').style.display = 'none';
-            document.getElementById('unauthorizeButton').style.display = 'none';
-        });
+        if (listenLaterButton) {
+            listenLaterButton.addEventListener('click', () => {
+                listenLaterList.push(currentSong);
+            });
+        }
 
-        window.onpopstate = router;
+        if (giveUpButton) {
+            giveUpButton.addEventListener('click', () => {
+                if (playButtonPressed) {
+                    document.getElementById('listenLaterButton').style.display = 'inline';
+                    document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
+                        + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
+                    songsWrong.push(" " + currentSong.attributes.name);
+                    playTime = 1000;
+                    music.stop();
+                    songCount++;
+                    incorrectCount++;
+                    playButtonPressed = false;
+                    if (playlistSize === songCount) {
+                        endgame();
+                    } else {
+                        if (playWithLibrary) {
+                            play(librarySongs);
+                        } else {
+                            play(selectedPlaylistTracks);
+                        }
+                    }
+                } else {
+                    console.error('game is not being played');
+                }
+            });
+        }
 
-        router();
+        if (unauthorizeButton) {
+            unauthorizeButton.addEventListener('click', () => {
+                music.unauthorize();
+                console.log('User has been unauthorized.');
+                document.getElementById('fetchLibraryButton').style.display = 'none';
+                document.getElementById('fetchPlaylistsButton').style.display = 'none';
+                document.getElementById('unauthorizeButton').style.display = 'none';
+            });
+        }
+
+        // window.onpopstate = router;
+        //
+        // router();
     }, 500);
 });
 
@@ -783,31 +849,3 @@ function showGame() {
         fetchPlaylistSongs(selectedPlaylistId);
     }
 }
-
-
-
-// document.getElementById('authorizeButton').addEventListener('click', () => {
-//     music.authorize().then((musicUserToken) => {
-//         console.log(`Authorized, music user token: ${musicUserToken}`);
-//         window.location.href = '/select-library';
-//     }).catch((error) => {
-//         console.error('Authorization error:', error);
-//     });
-// });
-
-// document.getElementById('fetchLibraryButton').addEventListener('click', () => {
-//     playWithLibrary = true;
-//     window.location.href = '/game';
-// });
-
-// document.getElementById('fetchPlaylistsButton').addEventListener('click', () => {
-//     window.location.href = '/game';
-// });
-
-// document.getElementById('homeButton2').addEventListener('click', () => {
-//     window.location.href = '/';
-// });
-//
-// document.getElementById('homeButton3').addEventListener('click', () => {
-//     window.location.href = '/';
-// });
