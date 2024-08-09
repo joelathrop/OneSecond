@@ -54,15 +54,13 @@ const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRV
 // TODO: Saving/loading states?
 
 document.addEventListener('DOMContentLoaded', () => {
-    // if (!music) {
-        MusicKit.configure({
-            developerToken: developerToken,
-            app: {
-                name: 'MusicKit Example',
-                build: '1978.4.1'
-            }
-        });
-    // }
+    MusicKit.configure({
+        developerToken: developerToken,
+        app: {
+            name: 'MusicKit Example',
+            build: '1978.4.1'
+        }
+    });
 
     /* Get all necessary values if page has reloaded */
     gamemode = getFromStorage('gamemode');
