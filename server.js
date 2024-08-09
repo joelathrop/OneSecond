@@ -15,12 +15,12 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-app.get('/selectLocation', (req, res) => {
-    res.render('selectLocation');
+app.get('/selectPlaylist', (req, res) => {
+    res.render('selectPlaylist');
 });
 
-app.get('/selectMode', (req, res) => {
-    res.render('selectMode');
+app.get('/selectCollection', (req, res) => {
+    res.render('selectCollection');
 });
 
 app.get('/game', (req, res) => {
