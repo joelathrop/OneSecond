@@ -803,10 +803,10 @@ function showGame() {
 //     window.location.href = '/game';
 // });
 
-document.getElementById('homeButton2').addEventListener('click', () => {
-    window.location.href = '/';
-});
-
-document.getElementById('homeButton3').addEventListener('click', () => {
-    window.location.href = '/';
-});
+// document.getElementById('homeButton2').addEventListener('click', () => {
+//     window.location.href = '/';
+// });
+//
+// document.getElementById('homeButton3').addEventListener('click', () => {
+//     window.location.href = '/';
+// });
