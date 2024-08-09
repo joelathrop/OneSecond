@@ -43,15 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // show/hide necessary buttons/headers
-    document.getElementById('difficultyHeader').style.display = 'inline';
-    document.getElementById('collectionHeader').style.display = 'none';
-    document.getElementById('fetchLibraryButton').style.display = 'none';
-    document.getElementById('fetchPlaylistsButton').style.display = 'none';
-    document.getElementById('normalModeButton').style.display = 'none';
-    document.getElementById('challengeModeButton').style.display = 'none';
-    document.getElementById('backButton').style.display = 'none';
-    document.getElementById('loadingMsg').style.display = 'none';
-    document.getElementById('listenLaterButton').style.display = 'none';
+    // document.getElementById('difficultyHeader').style.display = 'inline';
+    // document.getElementById('collectionHeader').style.display = 'none';
+    // document.getElementById('fetchLibraryButton').style.display = 'none';
+    // document.getElementById('fetchPlaylistsButton').style.display = 'none';
+    // document.getElementById('normalModeButton').style.display = 'none';
+    // document.getElementById('challengeModeButton').style.display = 'none';
+    // document.getElementById('backButton').style.display = 'none';
+    // document.getElementById('loadingMsg').style.display = 'none';
+    // document.getElementById('listenLaterButton').style.display = 'none';
 
     setTimeout(() => {
         music = MusicKit.getInstance();
@@ -75,15 +75,16 @@ document.addEventListener('DOMContentLoaded', () => {
             gamemode = 0;
             console.log('Game mode: ', gamemode);
             document.getElementById('difficultyHeader').style.display = 'none';
-            document.getElementById('collectionHeader').style.display = 'inline';
-            document.getElementById('fetchLibraryButton').style.display = 'inline';
-            document.getElementById('fetchPlaylistsButton').style.display = 'inline';
-            document.getElementById('normalModeButton').style.display = 'none';
-            document.getElementById('challengeModeButton').style.display = 'none';
-            document.getElementById('backButton').style.postion = 'relative';
-            document.getElementById('backButton').style.display = 'block';
-            document.getElementById('backButton').style.margin = 'auto';
+            // document.getElementById('collectionHeader').style.display = 'inline';
+            // document.getElementById('fetchLibraryButton').style.display = 'inline';
+            // document.getElementById('fetchPlaylistsButton').style.display = 'inline';
+            // document.getElementById('normalModeButton').style.display = 'none';
+            // document.getElementById('challengeModeButton').style.display = 'none';
+            // document.getElementById('backButton').style.postion = 'relative';
+            // document.getElementById('backButton').style.display = 'block';
+            // document.getElementById('backButton').style.margin = 'auto';
             window.location.href = '/selectMode'
+            console.log('hello')
         });
 
         document.getElementById('challengeModeButton').addEventListener('click', () => {
