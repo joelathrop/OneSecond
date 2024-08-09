@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedCollection = 1;
             sessionStorage.setItem('selectedCollection', selectedCollection);
 
-            window.location.href = '/selectLocation';
+            window.location.href = '/selectPlaylist';
         });
     }
 });
