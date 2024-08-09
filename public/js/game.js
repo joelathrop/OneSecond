@@ -1,14 +1,19 @@
 let music;
 let MUT;
 
-let gamemode;
-let selectedCollection;
-let selectedPlaylist;
-let selectedPlaylistId;
-let selectedPlaylistTracks = [];
-let firstTime;
-let playlistSize;
+let gamemode = -1;
 let offset = 100;
+let playlistSize;
+let selectedPlaylistId;
+let correctCount = 0;
+let incorrectCount = 0;
+
+let selectedCollection;
+
+let selectedPlaylistTracks = [];
+
+let playing;
+let firstTime;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
 const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
@@ -26,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     MUT = sessionStorage.getItem('MUT');
     gamemode = sessionStorage.getItem('gamemode');
     selectedCollection = parseInt(sessionStorage.getItem('selectedCollection'), 10);
+
+    document.getElementById('guessInput').addEventListener('input', () => {
+        const searchTerm = document.getElementById('guessInput').value.toLowerCase();
+        filterSongs(searchTerm);
+    });
 
     if (selectedCollection === 0) {   // library
 
@@ -88,4 +98,90 @@ function fetchPlaylistSongsPage(url) {
             playlistSize = selectedPlaylistTracks.length;
             play(selectedPlaylistTracks);
         });
+}
+
+/**
+ * Dynamically updates the score while the game is in progress
+ */
+function updateStats() {
+    document.getElementById('stats').textContent = `Score: ${correctCount} / ${incorrectCount + correctCount}` +
+        "   ||   Songs in the collection: " + `${selectedPlaylistTracks.length}`;
+}
+
+/**
+ * Plays the game
+ *
+ * @param songs - playlist songs to play
+ */
+function play(songs) {
+    music = MusicKit.getInstance();
+    playing = true;
+
+    displayItems([]);
+    updateStats();
+
+    // document.getElementById('guessInput').style.display = 'inline';
+    document.getElementById('guessInput').addEventListener('input', () => {
+        const searchTerm = document.getElementById('guessInput').value.toLowerCase();
+        filterSongs(searchTerm);
+    });
+    // document.getElementById('stats').style.display = 'inline';
+
+    // shuffle songs
+    if (firstTime) {
+        songs = shuffleArray(songs);
+        firstTime = false;
+
+        music.setQueue({items: songs}).then(queue => {
+            console.log('Playback queue set', queue);
+        }).catch(error => {
+            console.log('Error setting playback queue', error);
+        });
+    }
+
+    // show addTime button/label & give up button
+    document.getElementById('timeLabel').style.display = 'inline';
+    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+    // if (gamemode === 0) {
+    document.getElementById('giveUpButton').style.display = 'inline';
+    // }
+
+    console.log(songs);
+
+    document.getElementById('playButton').addEventListener('click', () => {
+        playButtonPressed = true;
+        document.getElementById('listenLaterButton').style.display = 'none';
+
+        currentSong = songs[songCount];
+        currentSongId = songs[songCount].id;
+
+        console.log(currentSongId);
+
+        if (songCount < songs.length) {
+            if (prevSongCount === songCount) {
+                music.play().then(() => {
+                    console.log('Playback started');
+                    setTimeout(() => {
+                        music.stop();
+                    }, playTime);
+                }).catch(error => {
+                    console.error('Error starting playback:', error);
+                });
+            } else if (prevSongCount < songCount) {
+                prevSongCount++;
+                music.skipToNextItem().then(() => {
+                    console.log('Playback started');
+                    setTimeout(() => {
+                        music.stop();
+                    }, playTime);
+                }).catch(error => {
+                    console.error('Error starting playback:', error);
+                });
+            } else {
+                console.log('something has gone terribly wrong');
+            }
+        } else {
+            endgame();
+        }
+    });
 }
