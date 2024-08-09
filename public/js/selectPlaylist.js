@@ -1,11 +1,37 @@
 let music;
+let MUT;
+let selectedPlaylist;
+let selectedPlaylistId;
 
 let allPlaylists = [];
 
 let playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
+const developerToken = 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdaVEZCWjRVNDUifQ.eyJpYXQiOjE3MjA4OTk3MTQsImV4cCI6MTczNjQ1MTcxNCwiaXNzIjoiMzNWODU3Tjc0NCJ9.zzlR2GUb829Brq-i_Y5l8RZNLjae34NC0Q4oexSpbZo7igEjc7jrbUOgU5OufcQGRJp5vxWUAiDmoMJh49YCww';
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    music = sessionStorage.getItem('music');
+    MusicKit.configure({
+        developerToken: developerToken,
+        app: {
+            name: 'MusicKit Example',
+            build: '1978.4.1'
+        }
+    });
+
+    // setTimeout(() => {
+        music = MusicKit.getInstance();
+    //     sessionStorage.setItem('music', music);
+    // }, 500);
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filterPlaylists(searchTerm);
+        });
+    }
+
+    // const gamemode = sessionStorage.getItem('gamemode');
+    MUT = sessionStorage.getItem('MUT');
     fetchUserPlaylists(music);
 });
 
@@ -16,10 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function fetchUserPlaylists(music) {
     console.log('Fetching user playlists...');
-    const musicUserToken = music.musicUserToken;
-    // document.getElementById('searchInput').style.display = 'inline';
 
-    if (!musicUserToken) {
+    if (!MUT) {
         console.error('Music user token is undefined. Make sure you are authorized.');
         return;
     }
@@ -41,7 +65,7 @@ function fetchPlaylistsPage(nextUrl) {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${developerToken}`,
-            'Music-User-Token': music.musicUserToken
+            'Music-User-Token': MUT
         }
     })
         .then(response => {
@@ -78,16 +102,26 @@ function displayItems(items) {
         li.setAttribute('data-id', item.id);
         li.classList.add('button', 'is-ghost', 'is-fullwidth');
         li.addEventListener('click', () => {
-            if (!playing) {
-                selectedPlaylist = item;
-                selectedPlaylistId = item.id;
-                console.log(`Selected playlist:`, item);
-                showGame();
-                itemList.innerHTML = '';
-            } else {
-                songComparator(item.id);
-            }
+            // selectedPlaylist = item;
+            selectedPlaylistId = item.id;
+            // sessionStorage.setItem('selectedPlaylist', item);
+            sessionStorage.setItem('selectedPlaylistId', item.id);
+            console.log(`Selected playlist ID: `, item.id);
+            itemList.innerHTML = '';
+
+            window.location.href = '/game';
         });
         itemList.appendChild(li);
     });
+}
+
+/**
+ * Input bar filter for playlists
+ * @param searchTerm
+ */
+function filterPlaylists(searchTerm) {
+    const filteredPlaylists = allPlaylists.filter(playlist =>
+        playlist.attributes.name.toLowerCase().includes(searchTerm)
+    );
+    displayItems(filteredPlaylists);
 }

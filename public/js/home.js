@@ -3,7 +3,7 @@ let loginButton;
 let logoutButton;
 let normalModeButton;
 let challengeModeButton;
-let gamemode = -1;
+let gamemode = -1;  // 0 for normal, 1 for challenge
 let MUT;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
         music = MusicKit.getInstance();
-        sessionStorage.setItem('music', music);
+        // sessionStorage.setItem('music', music);
     }, 500);
 
     // if (!music) {
@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginButton.addEventListener('click', () => {
             music.authorize().then((musicUserToken) => {
                 MUT = musicUserToken;
+                console.log(MUT);
 
                 // TODO: need this?
                 sessionStorage.setItem('MUT', MUT);
