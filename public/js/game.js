@@ -22,7 +22,7 @@ let playing;
 let firstTime;
 let playButtonPressed;
 let guess;
-let addTimeUsage;
+let addTimeUsage = false;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
 const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
@@ -38,12 +38,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     MUT = sessionStorage.getItem('MUT');
-    gamemode = sessionStorage.getItem('gamemode');
+    gamemode = parseInt(sessionStorage.getItem('gamemode'), 10);
     selectedCollection = parseInt(sessionStorage.getItem('selectedCollection'), 10);
 
     document.getElementById('guessInput').addEventListener('input', () => {
         const searchTerm = document.getElementById('guessInput').value.toLowerCase();
         filterSongs(searchTerm);
+    });
+
+    document.getElementById('addTime').addEventListener('click', () => {
+        console.log('hi');
+        console.log(gamemode);
+        if (gamemode === 1) {
+            if (!addTimeUsage) {
+                playTime += 2000;
+                addTimeUsage = true;
+                document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+            } else {
+                // TODO : BULMA BUTTON SHAKE
+                alert("You can't add any more time!");
+            }
+        } else if (gamemode === 0) {
+            console.log('here');
+            if (playTime < 10000) {
+                playTime += 1000;
+                console.log('Play time:' + playTime);
+                document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+            } else {
+                alert("You can't add any more time!");
+            }
+        }
     });
 
     if (selectedCollection === 0) {   // library
@@ -112,10 +136,6 @@ function fetchLibraryPage(url) {
             } else {
                 console.log('Finished fetching all library songs.');
                 document.getElementById('loadingMsg').style.display = 'none';
-
-                // show addTime button/label
-                document.getElementById('timeLabel').style.display = 'inline';
-                document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
 
                 firstTime = true;
                 playlistSize = librarySongs.length;
@@ -253,9 +273,9 @@ function songComparator(songId) {
             music.stop();
             songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('msg').textContent = 'Incorrect, try again.';
-            if (playWithLibrary) {  // TODO SELECTED COLLECTION
+            if (selectedCollection === 0) {  // TODO SELECTED COLLECTION
                 play(librarySongs);
-            } else {
+            } else if (selectedCollection === 1) {
                 play(selectedPlaylistTracks);
             }
         } else {
@@ -346,7 +366,10 @@ function play(songs) {
         const searchTerm = document.getElementById('guessInput').value.toLowerCase();
         filterSongs(searchTerm);
     });
-    // document.getElementById('stats').style.display = 'inline';
+
+    // show addTime button/label
+    document.getElementById('timeLabel').style.display = 'inline';
+    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
 
     // shuffle songs
     if (firstTime) {
@@ -359,13 +382,6 @@ function play(songs) {
             console.log('Error setting playback queue', error);
         });
     }
-
-    // show addTime button/label & give up button
-    // document.getElementById('timeLabel').style.display = 'inline';
-    // document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
-    // if (gamemode === 0) {
-    // document.getElementById('giveUpButton').style.display = 'inline';
-    // }
 
     console.log(songs);
 
