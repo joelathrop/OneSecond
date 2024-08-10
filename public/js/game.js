@@ -3,8 +3,13 @@ let MUT;
 
 let gamemode = -1;
 let offset = 100;
-let playlistSize;
+let songCount = 0;
+let prevSongCount = 0;
+let playlistSize = 0;
+let playTime = 1000;
 let selectedPlaylistId;
+let currentSong;
+let currentSongId;
 let correctCount = 0;
 let incorrectCount = 0;
 
@@ -14,6 +19,7 @@ let selectedPlaylistTracks = [];
 
 let playing;
 let firstTime;
+let playButtonPressed;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
 const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
@@ -109,6 +115,154 @@ function updateStats() {
 }
 
 /**
+ * Displays items in passed list. Each item has a listener
+ * @param items
+ */
+function displayItems(items) {
+    const itemList = document.getElementById('itemList');
+    // const itemList = document.createElement('itemList');
+    itemList.innerHTML = '';
+
+    items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.attributes.name;
+        li.setAttribute('data-id', item.id);
+        li.classList.add('button', 'is-ghost', 'is-fullwidth');
+        li.addEventListener('click', () => {
+            songComparator(item.id);
+        });
+        itemList.appendChild(li);
+    });
+}
+
+/**
+ * Input bar filter for songs
+ * @param searchTerm
+ */
+function filterSongs(searchTerm) {
+    let filteredSongs;
+    // hide songs if nothing in the search bar
+    if (searchTerm.trim() === '') {
+        displayItems([]);
+        return;
+    }
+
+
+    // TODO
+
+    // if (playWithLibrary) {
+    //     filteredSongs = librarySongs.filter(song =>
+    //         song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+    //     );
+    // } else {
+        filteredSongs = selectedPlaylistTracks.filter(song =>
+            song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    // }
+
+    displayItems(filteredSongs);
+}
+
+/**
+ * Compares two songs based on ID
+ * Increases the count
+ * @param songId
+ */
+function songComparator(songId) {
+    if (songId === currentSongId) {
+        document.getElementById('guessInput').value = "";
+        console.log('Guessed correctly');
+        songCount++;
+        correctCount++;     // TODO: MAKE SURE TO SHOW STATS ON THIS IN NORMAL MODE! MIGHT NOT BE 3/3 in the first second for example. Maybe first 3 seconds?
+        addTimeUsage = false;
+        playTime = 1000;
+        guess = true;
+        showSongInfo(guess, currentSong);
+    } else {
+        console.log('Guessed incorrectly');
+        if (gamemode === 0) {
+            incorrectCount++;
+            guess = false;
+            music.stop();
+            songsWrong.push(" " + currentSong.attributes.name);
+            document.getElementById('msg').textContent = 'Incorrect, try again.';
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
+        } else {
+            songCount++;
+            incorrectCount++;
+            addTimeUsage = false;
+            playTime = 1000;
+            guess = false;
+            showSongInfo(guess, currentSong);
+        }
+    }
+}
+
+/**
+ * Prints song title and artist
+ * @param guess
+ * @param song
+ */
+function showSongInfo(guess, song) {
+    document.getElementById('listenLaterButton').style.display = 'inline';
+    const songInfo = document.getElementById('msg');
+    const music = MusicKit.getInstance();
+    songInfo.innerHTML = '';
+
+    if (guess) {
+        playButtonPressed = false;
+        songInfo.textContent = 'Correct! That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        updateStats();
+        console.log(songCount);
+        console.log(playlistSize);
+        music.stop();
+        if (playlistSize === songCount) {
+            endgame();
+        } else {
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
+        }
+    } else {
+        songInfo.textContent = 'Incorrect. That song was: ' + `${song.attributes.name} by ${song.attributes.artistName}` + '. Click Play to play next song.';
+        music.stop();
+        updateStats();
+        songsWrong.push(" " + song.attributes.name);
+        console.log(songCount);
+        console.log(playlistSize);
+        if (playlistSize === songCount) {
+            endgame();
+        } else {
+            if (playWithLibrary) {
+                play(librarySongs);
+            } else {
+                play(selectedPlaylistTracks);
+            }
+        }
+    }
+}
+
+/**
+ * Shuffles an array
+ *
+ * @param array
+ * @returns {*} - shuffled array
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+/**
  * Plays the game
  *
  * @param songs - playlist songs to play
@@ -121,10 +275,10 @@ function play(songs) {
     updateStats();
 
     // document.getElementById('guessInput').style.display = 'inline';
-    document.getElementById('guessInput').addEventListener('input', () => {
-        const searchTerm = document.getElementById('guessInput').value.toLowerCase();
-        filterSongs(searchTerm);
-    });
+    // document.getElementById('guessInput').addEventListener('input', () => {
+    //     const searchTerm = document.getElementById('guessInput').value.toLowerCase();
+    //     filterSongs(searchTerm);
+    // });
     // document.getElementById('stats').style.display = 'inline';
 
     // shuffle songs
@@ -140,17 +294,17 @@ function play(songs) {
     }
 
     // show addTime button/label & give up button
-    document.getElementById('timeLabel').style.display = 'inline';
-    document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+    // document.getElementById('timeLabel').style.display = 'inline';
+    // document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
     // if (gamemode === 0) {
-    document.getElementById('giveUpButton').style.display = 'inline';
+    // document.getElementById('giveUpButton').style.display = 'inline';
     // }
 
     console.log(songs);
 
     document.getElementById('playButton').addEventListener('click', () => {
         playButtonPressed = true;
-        document.getElementById('listenLaterButton').style.display = 'none';
+        // document.getElementById('listenLaterButton').style.display = 'none';
 
         currentSong = songs[songCount];
         currentSongId = songs[songCount].id;
