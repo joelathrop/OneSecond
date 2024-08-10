@@ -13,9 +13,10 @@ let currentSongId;
 let correctCount = 0;
 let incorrectCount = 0;
 
-let selectedCollection;
+let selectedCollection;     // 0 for library, 1 for playlist
 
 let selectedPlaylistTracks = [];
+let librarySongs = [];
 
 let playing;
 let firstTime;
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (selectedCollection === 0) {   // library
-
+        fetchUserLibrary();
     } else if (selectedCollection === 1) {    // playlist
         // selectedPlaylist = sessionStorage.getItem('selectedPlaylist');
         selectedPlaylistId = sessionStorage.getItem('selectedPlaylistId');
@@ -57,6 +58,73 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('something bad happen');
     }
 });
+
+/**
+ * Ensures user is authorized to load library
+ */
+function fetchUserLibrary() {
+    // hide everything and tell em to wait a dam second
+
+    document.getElementById('loadingMsg').style.display = 'inline';
+
+    console.log('Fetching user library...');
+
+    if (!MUT) {
+        console.error('Music user token is undefined. Make sure you are authorized.');
+        return;
+    }
+
+    fetchLibraryPage(libraryURL);
+}
+
+/**
+ * Fetches all songs in the authorized user's Apple Music library,
+ * then displays them using displayItems()
+ *
+ * @param url
+ */
+function fetchLibraryPage(url) {
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${developerToken}`,
+            'Music-User-Token': MUT
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            librarySongs.push(...data.data);
+            console.log("library length: " + librarySongs.length);
+
+            console.log(data.next);
+
+            if (data.next) {
+                let nextUrl = new URL(data.next, libraryURL).href;
+                if (!nextUrl.includes('limit=')) {
+                    nextUrl += '&limit=100';
+                }
+                fetchLibraryPage(nextUrl);
+            } else {
+                console.log('Finished fetching all library songs.');
+                document.getElementById('loadingMsg').style.display = 'none';
+
+                // show addTime button/label
+                document.getElementById('timeLabel').style.display = 'inline';
+                document.getElementById('timeLabel').textContent = 'Time (seconds): ' + playTime / 1000;
+
+                firstTime = true;
+                playlistSize = librarySongs.length;
+                play(librarySongs);
+            }
+        }).catch(error => {
+        console.error('Error fetching library: ', error);
+    });
+}
 
 /**
  * Fetches the songs in the selected playlist and passes them to the play() function
@@ -149,18 +217,15 @@ function filterSongs(searchTerm) {
         return;
     }
 
-
-    // TODO
-
-    // if (playWithLibrary) {
-    //     filteredSongs = librarySongs.filter(song =>
-    //         song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
-    //     );
-    // } else {
+    if (selectedCollection === 0) {
+        filteredSongs = librarySongs.filter(song =>
+            song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    } else if (selectedCollection === 1) {
         filteredSongs = selectedPlaylistTracks.filter(song =>
             song.attributes.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    // }
+    }
 
     displayItems(filteredSongs);
 }
@@ -277,10 +342,10 @@ function play(songs) {
     updateStats();
 
     // document.getElementById('guessInput').style.display = 'inline';
-    // document.getElementById('guessInput').addEventListener('input', () => {
-    //     const searchTerm = document.getElementById('guessInput').value.toLowerCase();
-    //     filterSongs(searchTerm);
-    // });
+    document.getElementById('guessInput').addEventListener('input', () => {
+        const searchTerm = document.getElementById('guessInput').value.toLowerCase();
+        filterSongs(searchTerm);
+    });
     // document.getElementById('stats').style.display = 'inline';
 
     // shuffle songs
