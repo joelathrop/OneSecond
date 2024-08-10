@@ -20,6 +20,8 @@ let selectedPlaylistTracks = [];
 let playing;
 let firstTime;
 let playButtonPressed;
+let guess;
+let addTimeUsage;
 
 let libraryURL = 'https://api.music.apple.com/v1/me/library/songs?limit=100';
 const playlistsURL = 'https://api.music.apple.com/v1/me/library/playlists?limit=100';
@@ -186,7 +188,7 @@ function songComparator(songId) {
             music.stop();
             songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('msg').textContent = 'Incorrect, try again.';
-            if (playWithLibrary) {
+            if (playWithLibrary) {  // TODO SELECTED COLLECTION
                 play(librarySongs);
             } else {
                 play(selectedPlaylistTracks);
@@ -208,9 +210,9 @@ function songComparator(songId) {
  * @param song
  */
 function showSongInfo(guess, song) {
-    document.getElementById('listenLaterButton').style.display = 'inline';
+    // document.getElementById('listenLaterButton').style.display = 'inline';
     const songInfo = document.getElementById('msg');
-    const music = MusicKit.getInstance();
+    // const music = MusicKit.getInstance();
     songInfo.innerHTML = '';
 
     if (guess) {
