@@ -75,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // TODO listen later logic
             document.getElementById('msg').textContent = 'That song was: ' + `${currentSong.attributes.name}`
                 + ' by ' + `${currentSong.attributes.artistName}` + ". Click Play to play next song.";
-            // TODO don't push if you already got it wrong
+            // TODO don't push or count if you already got it wrong
+            // maybe another counter for incorrect guesses on normal mode?
             songsWrong.push(" " + currentSong.attributes.name);
             playTime = 1000;
             music.stop();
