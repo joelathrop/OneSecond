@@ -299,7 +299,7 @@ function songComparator(songId) {
             music.stop();
             songsWrong.push(" " + currentSong.attributes.name);
             document.getElementById('msg').textContent = 'Incorrect, try again.';
-            if (selectedCollection === 0) {  // TODO SELECTED COLLECTION
+            if (selectedCollection === 0) {
                 play(librarySongs);
             } else if (selectedCollection === 1) {
                 play(selectedPlaylistTracks);
