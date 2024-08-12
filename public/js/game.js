@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedCollection = parseInt(sessionStorage.getItem('selectedCollection'), 10);
     document.getElementById('songsWrong').style.display = 'none';
     document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('homeButton').style.display = 'none';
 
     document.getElementById('guessInput').addEventListener('input', () => {
         const searchTerm = document.getElementById('guessInput').value.toLowerCase();
