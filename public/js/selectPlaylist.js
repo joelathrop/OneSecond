@@ -100,7 +100,7 @@ function displayItems(items) {
         const li = document.createElement('li');
         li.textContent = item.attributes.name;
         li.setAttribute('data-id', item.id);
-        li.classList.add('button', 'is-ghost', 'is-fullwidth');
+        li.classList.add('button', 'is-small', 'is-focused', 'is-dark', 'is-link');
         li.addEventListener('click', () => {
             // selectedPlaylist = item;
             selectedPlaylistId = item.id;

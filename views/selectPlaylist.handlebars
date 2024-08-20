@@ -6,19 +6,25 @@
     <section class="section">
         <div class="container">
             <div class="box-container">
-                <div class="box large-box">
-                    <h2 class="subtitle has-text-link">Select a Playlist</h2>
+                <div class="box large-box has-text-centered">
+                    <h2 class="subtitle has-text-weight-bold is-size-4 has-text-link">Select a Playlist</h2>
                     <div class="field">
                         <div class="control">
                             <input type="text" id="searchInput" class="input" placeholder="Search Playlists...">
                         </div>
                     </div>
-                    <div class="home-button-container">
+                        <ul id="itemList" class="mt-4"></ul>
+                    {{!-- <div class="home-button-container">
                         <button id="homeButton2" class="button is-link">Home</button>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <ul id="itemList" class="mt-4"></ul>
         </div>
+         <div class="home-button-container">
+                        <button id="homeButton2" class="button is-link">Home</button>
+                    </div>
     </section>
     <script src="/js/selectPlaylist.js"></script>
+
+    <link rel="stylesheet" href="style.css">
