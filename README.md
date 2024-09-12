@@ -28,10 +28,18 @@ Run locally:
 Run with podman: </br>
 ```podman build -t <applicationName> .``` </br>
 ```podman run -d -p <port>:<port> <applicationName>```
+* On the ec2 instance, the port:port maps the port you want to run it on 
+to the port the application is expecting. This is defined in the Dockerfile,
+it should be port 3000. 
 
 See podman processes: ```podman ps``` </br>
 Stop: ```podman stop <container_id_or_name>``` </br>
 Force stop: ```podman stop -t 0 <container_id_or_name>```
+
+If you're having those ubuntu problems run podman machine init and then podman machine start
+
+How to find ec2 instance in browser:
+https://`<ec2-public-ip>`:`<port>`
 
 ## References
 Apple Music API Documentation
