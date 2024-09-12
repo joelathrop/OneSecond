@@ -22,8 +22,16 @@ At the end of the game, you will see your stats displayed, along with a list of 
 incorrect. 
 
 ## Compilation and Running
-Run:
+Run locally:
 ```node server.js```
+
+Run with podman: </br>
+```podman build -t <applicationName> .``` </br>
+```podman run -d -p <port>:<port> <applicationName>```
+
+See podman processes: ```podman ps``` </br>
+Stop: ```podman stop <container_id_or_name>``` </br>
+Force stop: ```podman stop -t 0 <container_id_or_name>```
 
 ## References
 Apple Music API Documentation
